@@ -1,5 +1,5 @@
 # Site settings
-baseURL = "http://example.org/"
+baseURL = "https://ingemannportfolio/"
 languageCode = "en-us"
 title = "Forty"
 theme = "forty"
@@ -19,8 +19,8 @@ disqusShortname = ""
   # CSS class.
 
   # Provide your metadata here.
-  name = "Your name"
-  description = "Your description"
+  name = "Sebastian Goth Ingemann"
+  description = "MFA student at London Business School"
 
   # Link custom assets relative to /static
   custom_css = []
