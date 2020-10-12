@@ -1,5 +1,5 @@
 # Site settings
-baseURL = "https://ingemannportfolio/"
+baseURL = "https://ingemannportfolio.netlify.app/"
 languageCode = "en-us"
 title = "Forty"
 theme = "forty"
