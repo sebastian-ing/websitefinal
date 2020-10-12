@@ -1,5 +1,5 @@
 # Site settings
-baseURL = "https://ingemannportfolio/"
+baseURL = "https://ingemannportfolio.netlify.app/"
 languageCode = "en-us"
 title = "Forty"
 theme = "forty"
@@ -33,7 +33,7 @@ disqusShortname = ""
   # 404 error customization
   [params.error404]
     heading = "Page couldn't be found"
-    text = "Please visit [this page](/)"
+    text = "Please go back to the homepage [this page](/)"
 
   # Navigation Section
   [params.navigation]
