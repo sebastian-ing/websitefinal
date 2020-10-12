@@ -143,12 +143,12 @@ disqusShortname = ""
     I am now a student at London Business school, specializing in finance. As part of my studies I have been analyzing quite a lot of different data.
     If you are interested in some of these analyses you can find them on this website."""
     buttonText = "Take a look"
-    url = "blogs"
+    url = "projects"
 
 
   # Contact section
-  [params.contact]
-    enable = true
+ # [params.contact]
+   # enable = true
    # buttonSend = "Send message"
     #buttonClear = "Clear"
 
@@ -185,7 +185,7 @@ disqusShortname = ""
   # Footer section
   [params.footer]
     enable = true
-    copyright = "Sebastian Ingemann"
+ #   copyright = "Sebastian Ingemann"
 
     # Uses font awesome icons
   #  [[params.footer.social]]
@@ -210,7 +210,7 @@ disqusShortname = ""
 
     [[params.footer.social]]
       icon = "fa-linkedin"
-      url= "https://www.linkedin.com/sebastianingemann"
+      url= "https://www.linkedin.com/in/sebastianingemann"
       label = "LinkedIn"
 
     [[params.footer.quicklinks]]
