@@ -95,7 +95,7 @@ disqusShortname = ""
       title = "Aliquam"
       subtitle = "Ipsum Dolor Sit Amet"
       image = "pic01.jpg"
-      url = "blogs/aliquam"
+      url = "projects/nordicgdp"
 
     [[params.tiles.showcase]]
       title = "Tempus"
@@ -147,8 +147,8 @@ disqusShortname = ""
 
 
   # Contact section
- # [params.contact]
-  #  enable = true
+  [params.contact]
+    enable = true
    # buttonSend = "Send message"
     #buttonClear = "Clear"
 
