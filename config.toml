@@ -93,7 +93,7 @@ disqusShortname = ""
     
     [[params.tiles.showcase]]
       title = "Croatian currency trade"
-      subtitle = "Analyzing a potential currency trade between the Crotian Kuna and the Euro"
+      subtitle = "Analyzing potential currency trade between the Crotian Kuna and the Euro"
       image = "pic09.jpg"
       url = "projects/currencytrade"
 
