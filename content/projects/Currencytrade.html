@@ -1,0 +1,1466 @@
+---
+categories:
+- ""
+- ""
+date: "2020-10-12T22:26:09-05:00"
+description: Lorem Etiam Nullam
+draft: false
+image: pic09.jpg
+keywords: ""
+slug: currencytrade
+title: Currency trade
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+<link href="/rmarkdown-libs/lightable/lightable.css" rel="stylesheet" />
+
+
+<div id="using-r-to-study-a-potential-currency-trade" class="section level1">
+<h1>Using R to study a potential currency trade</h1>
+<p>The inspiration for this post actually comes from a trading strategy project I was doing in my investment fundamental course. I would normally have used excel for this type of analysis, but I decided to try R and I found it to be much more powerful at analyzing the trading strategy than excel would have been. Before we start the analysis, let us look at the background of the trading strategy.</p>
+<div id="trading-strategy" class="section level2">
+<h2>Trading strategy</h2>
+<p>The Croatian economy is very dependent on tourism. In fact around 20% of the GDP is related to the tourist sector, and more than 30 million people visit the country every year. However most people visit the country during the tourist season, which runs every year from May to October. Most tourists comes from the rest of Europe, and consequently we see a large inflow of euros (and therefore outflow of the Croatian Kuno (HKR)) during the tourist season. While the HKR is pegged to the EUR, it has a band of +-15% it can move around a fixed point, and as a result we see fairly predictable exchange rate fluctuations between the HKR and the EUR every year. Some asset managers trade on these fluctuations, and I thought it would be interesting to look into whether this is a potential strategy that can be employed.</p>
+</div>
+<div id="the-optimal-strategy" class="section level2">
+<h2>The optimal strategy</h2>
+<p>We want to try out two strategies: The theoretical optimal strategy and the implementable strategy. The optimal strategy will give you the return if you were able to time the market perfectly every year, while the implementable strategy is a strategy which is fairly easy to implement (but will give you lower returns). To simulate both strategies we will use R, and I will guide you as we go along on why we are doing the different things. To begin with you can see below which packages I will be using:</p>
+<pre class="r"><code>library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(GGally)
+library(readxl)
+library(here)
+library(skimr)
+library(janitor)
+library(broom)
+library(kableExtra)
+library(lubridate)</code></pre>
+<p>First let us read the data. Here I have downloaded <a href="https://www.hnb.hr/en/core-functions/monetary-policy/exchange-rate-list/exchange-rate-list">Croatian currency data from the last 15 years from the Croatian central bank</a>. We will be looking at the exchange rate with the EUR. Let us first load the data.</p>
+<pre class="r"><code>HRK_data  &lt;-  read_xlsx(here::here(&quot;data&quot;, &quot;DailyExchangeRates_01101999-12102020.xlsx&quot;), # Loads data with excel filename
+              
+                         sheet=&quot;DailyExchangeRates_01101999-121&quot;,  #Name of sheet we want data from
+                skip=0) # Number of rows to skip (none)
+
+skim(HRK_data) #it is always a good idea to skim the data to get an idea of what we are working with</code></pre>
+<table style='width: auto;'
+        class='table table-condensed'>
+<caption>
+(#tab:read_exchange data)Data summary
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Name
+</td>
+<td style="text-align:left;">
+HRK_data
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Number of rows
+</td>
+<td style="text-align:left;">
+7683
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Number of columns
+</td>
+<td style="text-align:left;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+_______________________
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Column type frequency:
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+character
+</td>
+<td style="text-align:left;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+________________________
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Group variables
+</td>
+<td style="text-align:left;">
+None
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+skim_variable
+</th>
+<th style="text-align:right;">
+n_missing
+</th>
+<th style="text-align:right;">
+complete_rate
+</th>
+<th style="text-align:right;">
+min
+</th>
+<th style="text-align:right;">
+max
+</th>
+<th style="text-align:right;">
+empty
+</th>
+<th style="text-align:right;">
+n_unique
+</th>
+<th style="text-align:right;">
+whitespace
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Date
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+7683
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Country
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Currency
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+skim_variable
+</th>
+<th style="text-align:right;">
+n_missing
+</th>
+<th style="text-align:right;">
+complete_rate
+</th>
+<th style="text-align:right;">
+mean
+</th>
+<th style="text-align:right;">
+sd
+</th>
+<th style="text-align:right;">
+p0
+</th>
+<th style="text-align:right;">
+p25
+</th>
+<th style="text-align:right;">
+p50
+</th>
+<th style="text-align:right;">
+p75
+</th>
+<th style="text-align:right;">
+p100
+</th>
+<th style="text-align:left;">
+hist
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Exchange rate list number
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+126.52
+</td>
+<td style="text-align:right;">
+72.66
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+64.00
+</td>
+<td style="text-align:right;">
+126.00
+</td>
+<td style="text-align:right;">
+190.00
+</td>
+<td style="text-align:right;">
+254.00
+</td>
+<td style="text-align:left;">
+&lt;U+2587&gt;&lt;U+2587&gt;&lt;U+2587&gt;&lt;U+2587&gt;&lt;U+2587&gt;
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Currency code
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+978.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+978.00
+</td>
+<td style="text-align:right;">
+978.00
+</td>
+<td style="text-align:right;">
+978.00
+</td>
+<td style="text-align:right;">
+978.00
+</td>
+<td style="text-align:right;">
+978.00
+</td>
+<td style="text-align:left;">
+&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2587&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Unit
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:left;">
+&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2587&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Buying rate
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+7.44
+</td>
+<td style="text-align:right;">
+0.13
+</td>
+<td style="text-align:right;">
+7.09
+</td>
+<td style="text-align:right;">
+7.35
+</td>
+<td style="text-align:right;">
+7.42
+</td>
+<td style="text-align:right;">
+7.54
+</td>
+<td style="text-align:right;">
+7.72
+</td>
+<td style="text-align:left;">
+&lt;U+2581&gt;&lt;U+2585&gt;&lt;U+2587&gt;&lt;U+2586&gt;&lt;U+2583&gt;
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Middle rate
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+7.46
+</td>
+<td style="text-align:right;">
+0.13
+</td>
+<td style="text-align:right;">
+7.11
+</td>
+<td style="text-align:right;">
+7.37
+</td>
+<td style="text-align:right;">
+7.44
+</td>
+<td style="text-align:right;">
+7.56
+</td>
+<td style="text-align:right;">
+7.74
+</td>
+<td style="text-align:left;">
+&lt;U+2581&gt;&lt;U+2585&gt;&lt;U+2587&gt;&lt;U+2586&gt;&lt;U+2583&gt;
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Selling rate
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+7.48
+</td>
+<td style="text-align:right;">
+0.13
+</td>
+<td style="text-align:right;">
+7.13
+</td>
+<td style="text-align:right;">
+7.39
+</td>
+<td style="text-align:right;">
+7.47
+</td>
+<td style="text-align:right;">
+7.59
+</td>
+<td style="text-align:right;">
+7.76
+</td>
+<td style="text-align:left;">
+&lt;U+2581&gt;&lt;U+2585&gt;&lt;U+2587&gt;&lt;U+2586&gt;&lt;U+2583&gt;
+</td>
+</tr>
+</tbody>
+</table>
+<p>We will only be working with two of the variables: <code>Date</code> and <code>Middle Rate</code>. To implement the optimal strategy, what we want to do is to look at a “tourist year” instead of a normal year. The idea is that we want to buy HKR at the lowest point during the off-season, when the currency should be at its lowest, and sell it during the tourist season, when the currency has appreciated again. To do this we define a new column <code>t_year</code> which matches the tourist season. Our off-season will run from November 1 of every year to April 30 the next year, while the tourist season runs from 1 May to 31 October. So the tourist year of 2010 will begin on 1 November 2009 and finish on October 31 2010. Let us clean up the data a bit and then add this.</p>
+<pre class="r"><code>HRK_data_mod &lt;- HRK_data %&gt;% 
+  #Fixes date format and changes exchange from HRK/EUR to EUR/HRK
+  mutate(Date = dmy(Date),
+         year = year(Date),
+        month =  month(Date, label = TRUE),
+         day = day(Date),
+       `Middle rate` = 1 / `Middle rate`) %&gt;% 
+  # Each period we are looking at is divided into a tourist season and an off-season - which means the &quot;tourism year&quot; runs from october-sep. Consequently we will create a new value &quot;t_year&quot;, to help us find the value within each period
+         
+  mutate(t_year = case_when(
+           
+           Date &gt;= &quot;2004-11-01&quot; &amp; Date &lt;= &quot;2005-10-31&quot; ~ 2005,
+           Date &gt;= &quot;2005-11-01&quot; &amp; Date &lt;= &quot;2006-10-31&quot; ~ 2006,
+           Date &gt;= &quot;2006-11-01&quot; &amp; Date &lt;= &quot;2007-10-31&quot; ~ 2007,
+           Date &gt;= &quot;2007-11-01&quot; &amp; Date &lt;= &quot;2008-10-31&quot; ~ 2008,
+           Date &gt;= &quot;2008-11-01&quot; &amp; Date &lt;= &quot;2009-10-31&quot; ~ 2009,
+           Date &gt;= &quot;2009-11-01&quot; &amp; Date &lt;= &quot;2010-10-31&quot; ~ 2010,
+           Date &gt;= &quot;2010-11-01&quot; &amp; Date &lt;= &quot;2011-10-31&quot; ~ 2011,
+           Date &gt;= &quot;2011-11-01&quot; &amp; Date &lt;= &quot;2012-10-31&quot; ~ 2012,
+           Date &gt;= &quot;2012-11-01&quot; &amp; Date &lt;= &quot;2013-10-31&quot; ~ 2013,
+           Date &gt;= &quot;2013-11-01&quot; &amp; Date &lt;= &quot;2014-10-31&quot; ~ 2014,
+           Date &gt;= &quot;2014-11-01&quot; &amp; Date &lt;= &quot;2015-10-31&quot; ~ 2015,
+           Date &gt;= &quot;2015-11-01&quot; &amp; Date &lt;= &quot;2016-10-31&quot; ~ 2016,
+           Date &gt;= &quot;2016-11-01&quot; &amp; Date &lt;= &quot;2017-10-31&quot; ~ 2017,
+           Date &gt;= &quot;2017-11-01&quot; &amp; Date &lt;= &quot;2018-10-31&quot; ~ 2018,
+           Date &gt;= &quot;2018-11-01&quot; &amp; Date &lt;= &quot;2019-10-31&quot; ~ 2019,
+           TRUE ~ 0)) %&gt;% 
+  # We will only be looking at values from 2005 and on, so we filter out the remaining
+  filter(t_year &gt; 0) %&gt;% 
+  # Finally let us define the tourism season as May-Oct, and off-season as Nov-Apr for each year
+  mutate(
+           season = case_when(
+           month %in% c(&quot;May&quot;, &quot;Jun&quot;, &quot;Jul&quot;, &quot;Aug&quot;, &quot;Sep&quot;, &quot;Oct&quot;) ~ &quot;Tourist_season&quot;,
+           TRUE ~ &quot;Off_season&quot;))</code></pre>
+<p>Next we will find the optimal trading days for each year. We do this by finding the maximum exchange rate for the the “tourist season” part of the year, and the lowest exchange rate for the “off-season” part of the year.</p>
+<pre class="r"><code>HRK_data_optimal &lt;- HRK_data_mod %&gt;% 
+  #Now we calculate the maximum currency value in the tourist season and the lowest in the off-season. These are our optimal buying / selling rates         
+  group_by(t_year, season) %&gt;% 
+  summarize(value = case_when(
+    season == &quot;Tourist_season&quot; ~ max(`Middle rate`),
+    season == &quot;Off_season&quot; ~ min(`Middle rate`)),
+    # we also find the dates for when we would make these trade
+    date = case_when(
+      season == &quot;Tourist_season&quot; ~ Date[which.max(`Middle rate`)],
+      season == &quot;Off_season&quot; ~ Date[which.min(`Middle rate`)]
+    )) %&gt;% 
+  # We use summarize to create a new DF in which we have both the sale and purchase value in one row. We calculate the absolute gain and the % return, as well as how long we have held the position.
+  group_by(t_year) %&gt;% 
+  summarize(date_purchase = date[which.min(value)],
+            value_purchase = min(value),
+            date_sale = date[which.max(value)],
+            value_sale = max(value),
+            diff = value_sale - value_purchase,
+            return = diff / value_purchase * 100,
+            position_days = date_sale - date_purchase
+            )
+
+#let us display it in a nice table
+    
+HRK_data_optimal %&gt;% 
+  kable(caption = &quot;TABLE xx: Annual returns from optimal trading strategy for HKR/EUR&quot;,
+             col.names = c(&quot;Tourism year&quot;, &quot;Date of purchase&quot;, &quot;Purchase price&quot;, &quot;Date of sale&quot;,  &quot;Sale price&quot;, &quot;Absolute return&quot;, &quot;Return (%)&quot;, &quot;Days of position&quot;),
+        digits = 4) %&gt;% 
+  kable_classic(&quot;striped&quot;, full_width = FALSE) </code></pre>
+<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+<caption>
+(#tab:optimal trading strategy)TABLE xx: Annual returns from optimal trading strategy for HKR/EUR
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+Tourism year
+</th>
+<th style="text-align:left;">
+Date of purchase
+</th>
+<th style="text-align:right;">
+Purchase price
+</th>
+<th style="text-align:left;">
+Date of sale
+</th>
+<th style="text-align:right;">
+Sale price
+</th>
+<th style="text-align:right;">
+Absolute return
+</th>
+<th style="text-align:right;">
+Return (%)
+</th>
+<th style="text-align:left;">
+Days of position
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+2005
+</td>
+<td style="text-align:left;">
+2004-12-31
+</td>
+<td style="text-align:right;">
+0.130
+</td>
+<td style="text-align:left;">
+2005-07-28
+</td>
+<td style="text-align:right;">
+0.137
+</td>
+<td style="text-align:right;">
+0.0068
+</td>
+<td style="text-align:right;">
+5.220
+</td>
+<td style="text-align:left;">
+209 days
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2006
+</td>
+<td style="text-align:left;">
+2005-12-23
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:left;">
+2006-07-05
+</td>
+<td style="text-align:right;">
+0.138
+</td>
+<td style="text-align:right;">
+0.0032
+</td>
+<td style="text-align:right;">
+2.367
+</td>
+<td style="text-align:left;">
+194 days
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2007
+</td>
+<td style="text-align:left;">
+2007-04-05
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:left;">
+2007-07-18
+</td>
+<td style="text-align:right;">
+0.137
+</td>
+<td style="text-align:right;">
+0.0025
+</td>
+<td style="text-align:right;">
+1.845
+</td>
+<td style="text-align:left;">
+104 days
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:left;">
+2007-11-20
+</td>
+<td style="text-align:right;">
+0.136
+</td>
+<td style="text-align:left;">
+2008-10-03
+</td>
+<td style="text-align:right;">
+0.141
+</td>
+<td style="text-align:right;">
+0.0047
+</td>
+<td style="text-align:right;">
+3.451
+</td>
+<td style="text-align:left;">
+318 days
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2009
+</td>
+<td style="text-align:left;">
+2009-02-24
+</td>
+<td style="text-align:right;">
+0.134
+</td>
+<td style="text-align:left;">
+2009-10-29
+</td>
+<td style="text-align:right;">
+0.139
+</td>
+<td style="text-align:right;">
+0.0049
+</td>
+<td style="text-align:right;">
+3.698
+</td>
+<td style="text-align:left;">
+247 days
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2010
+</td>
+<td style="text-align:left;">
+2009-11-24
+</td>
+<td style="text-align:right;">
+0.137
+</td>
+<td style="text-align:left;">
+2010-07-10
+</td>
+<td style="text-align:right;">
+0.139
+</td>
+<td style="text-align:right;">
+0.0027
+</td>
+<td style="text-align:right;">
+1.954
+</td>
+<td style="text-align:left;">
+228 days
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2011
+</td>
+<td style="text-align:left;">
+2011-03-02
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:left;">
+2011-05-01
+</td>
+<td style="text-align:right;">
+0.136
+</td>
+<td style="text-align:right;">
+0.0013
+</td>
+<td style="text-align:right;">
+0.956
+</td>
+<td style="text-align:left;">
+60 days
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2012
+</td>
+<td style="text-align:left;">
+2012-02-14
+</td>
+<td style="text-align:right;">
+0.132
+</td>
+<td style="text-align:left;">
+2012-09-25
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:right;">
+0.0035
+</td>
+<td style="text-align:right;">
+2.665
+</td>
+<td style="text-align:left;">
+224 days
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2013
+</td>
+<td style="text-align:left;">
+2013-04-16
+</td>
+<td style="text-align:right;">
+0.131
+</td>
+<td style="text-align:left;">
+2013-07-03
+</td>
+<td style="text-align:right;">
+0.134
+</td>
+<td style="text-align:right;">
+0.0030
+</td>
+<td style="text-align:right;">
+2.246
+</td>
+<td style="text-align:left;">
+78 days
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2014
+</td>
+<td style="text-align:left;">
+2014-02-22
+</td>
+<td style="text-align:right;">
+0.130
+</td>
+<td style="text-align:left;">
+2014-06-06
+</td>
+<td style="text-align:right;">
+0.132
+</td>
+<td style="text-align:right;">
+0.0018
+</td>
+<td style="text-align:right;">
+1.356
+</td>
+<td style="text-align:left;">
+104 days
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2015
+</td>
+<td style="text-align:left;">
+2015-02-20
+</td>
+<td style="text-align:right;">
+0.130
+</td>
+<td style="text-align:left;">
+2015-05-21
+</td>
+<td style="text-align:right;">
+0.133
+</td>
+<td style="text-align:right;">
+0.0034
+</td>
+<td style="text-align:right;">
+2.599
+</td>
+<td style="text-align:left;">
+90 days
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2016
+</td>
+<td style="text-align:left;">
+2016-01-16
+</td>
+<td style="text-align:right;">
+0.130
+</td>
+<td style="text-align:left;">
+2016-08-10
+</td>
+<td style="text-align:right;">
+0.134
+</td>
+<td style="text-align:right;">
+0.0035
+</td>
+<td style="text-align:right;">
+2.693
+</td>
+<td style="text-align:left;">
+207 days
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2017
+</td>
+<td style="text-align:left;">
+2017-01-10
+</td>
+<td style="text-align:right;">
+0.132
+</td>
+<td style="text-align:left;">
+2017-08-18
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:right;">
+0.0034
+</td>
+<td style="text-align:right;">
+2.569
+</td>
+<td style="text-align:left;">
+220 days
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2018
+</td>
+<td style="text-align:left;">
+2017-11-25
+</td>
+<td style="text-align:right;">
+0.132
+</td>
+<td style="text-align:left;">
+2018-06-27
+</td>
+<td style="text-align:right;">
+0.136
+</td>
+<td style="text-align:right;">
+0.0036
+</td>
+<td style="text-align:right;">
+2.748
+</td>
+<td style="text-align:left;">
+214 days
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2019
+</td>
+<td style="text-align:left;">
+2019-01-25
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:left;">
+2019-08-03
+</td>
+<td style="text-align:right;">
+0.136
+</td>
+<td style="text-align:right;">
+0.0011
+</td>
+<td style="text-align:right;">
+0.830
+</td>
+<td style="text-align:left;">
+190 days
+</td>
+</tr>
+</tbody>
+</table>
+<p>This looks very nice. The returns are not going to make you a millionaire over night, but they do provide a consistent positive return every year. While we are at it let us just visualize the data and find the mean.</p>
+<pre class="r"><code># Plots the data. We reorder so it shows returns in descending orders
+ggplot(HRK_data_optimal, aes(x = reorder(t_year, -return),
+                             y = return))+
+  # Adds columns
+  geom_col(fill = &quot;Dark Blue&quot;)+
+  #Theme for plot
+  theme_bw()+
+  #We add a horizontal red line that represents the mean return over the years
+  geom_hline(yintercept = mean(HRK_data_optimal$return),
+             color = &quot;Red&quot;)+
+  #We add labels to the columns...
+  geom_text(aes(label = format(round(return, digits = 1), nsmall = 1)), 
+            vjust = -0.5, 
+            size = 3)+
+  # ... And a label for the horizontal mean line
+   geom_text(aes(15,
+                 mean(return),
+                 label = round(mean(return), digits = 1),
+                 vjust = -1),
+             size = 3,
+             color = &quot;red&quot;)+
+  #Finally we add titles to the plot
+  labs(title = &quot;Employing optimal strategy would have resulted in a \nmean annual return of 2.5%&quot;,
+       subtitle = &quot;Return of strategy does not appear to have been reduced in recent years, \nalthough 2019 was a lowpoint&quot;,
+       caption = &quot;Source: Croation National Bank (https://hnb.hr/en)&quot;,
+       x = &quot;Year&quot;,
+       y = &quot;Return (%)&quot;)+
+  # Graphical tweakes - the scale_y_continous makes sure the columns are not floating on the x-axis.
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
+  theme(axis.text = element_text(size = 8))</code></pre>
+<p><img src="/projects/Currencytrade_files/figure-html/optimal-plot-1.png" width="648" style="display: block; margin: auto;" />
+Again 2.5% is not a lot for a mean return, but with currencies you can normally use a lot of leverage to increase your returns.</p>
+<p>One question we could ask ourselves is whether this return provides significant positive returns. To do this let us create a confidence interval for the return. If 0 is part of it, we cannot say for sure the return is significant.</p>
+<pre class="r"><code>HRK_optimal_summary &lt;- HRK_data_optimal %&gt;% 
+  #We calculate the confidence interval 
+  summarize(mean_position = format(mean(position_days), digits = 0),
+            mean_return = mean(return),
+            sd_return = sd(return),
+            observations = n(),
+            se_return = sd_return / sqrt(observations),
+            t_critical = qt(0.975, observations-1),
+            MoE = t_critical * se_return,
+            LowerCI = mean_return - MoE,
+            UpperCI = mean_return + MoE)
+
+#Let us make the table look nice
+HRK_optimal_summary %&gt;% 
+  kable(caption = &quot;TABLE 1.2: Annual returns from optimal trading strategy for HKR/EUR&quot;,
+             col.names = c(&quot;Mean position length&quot;, &quot;Mean return (%)&quot;, &quot;Standard deviation (%)&quot;, &quot;Observations&quot;,  &quot;Standard error (%)&quot;, &quot;T critical&quot;, &quot;Margin of error (%)&quot;, &quot;Lower CI (%)&quot;, &quot;Upper CI (%)&quot;),
+        digits = 4) %&gt;% 
+  kable_classic(&quot;striped&quot;, full_width = FALSE) </code></pre>
+<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+<caption>
+<span id="tab:unnamed-chunk-1">Table 1: </span>TABLE 1.2: Annual returns from optimal trading strategy for HKR/EUR
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Mean position length
+</th>
+<th style="text-align:right;">
+Mean return (%)
+</th>
+<th style="text-align:right;">
+Standard deviation (%)
+</th>
+<th style="text-align:right;">
+Observations
+</th>
+<th style="text-align:right;">
+Standard error (%)
+</th>
+<th style="text-align:right;">
+T critical
+</th>
+<th style="text-align:right;">
+Margin of error (%)
+</th>
+<th style="text-align:right;">
+Lower CI (%)
+</th>
+<th style="text-align:right;">
+Upper CI (%)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+179 days
+</td>
+<td style="text-align:right;">
+2.48
+</td>
+<td style="text-align:right;">
+1.11
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+0.286
+</td>
+<td style="text-align:right;">
+2.14
+</td>
+<td style="text-align:right;">
+0.613
+</td>
+<td style="text-align:right;">
+1.87
+</td>
+<td style="text-align:right;">
+3.09
+</td>
+</tr>
+</tbody>
+</table>
+<p>So with 95% confidence we can say the returns are significant (do note our observations are below the 25-30 we would normally want).</p>
+</div>
+<div id="implementable-strategy" class="section level2">
+<h2>Implementable strategy</h2>
+<p>We just found the optimal strategy, but let us now try to do the same for the implementable strategy. What we can see in the first table we made (table 1.1) is that most purchase dates cluster around January and February, while most sales dates cluster around July and August. Let us therefore use the optimal trading dates we just found to find an entry and exit date for the position for every year.</p>
+<pre class="r"><code>HRK_optimal_dates &lt;- HRK_data_optimal %&gt;% 
+  #We want to convert the months and days for each optimal date into numbers (we do not care about the year). There is no mmdd format for lubridate, so instead we find the number of days in the year
+  mutate(monthday_purchase = month(date_purchase) * 30 + day(date_purchase),
+         monthday_sale = month(date_sale) * 30 + day(date_sale)) %&gt;% 
+  summarize(median_purchase = median(monthday_purchase),
+            median_sale = median(monthday_sale)) %&gt;% 
+  mutate(optimal_purchase_month = month(median_purchase %/% 32, label = TRUE),
+         optimal_purchase_day = median_purchase %% 30,
+         optimal_sale_month = month(median_sale %/% 30, label = TRUE),
+         optimal_sale_day = median_sale %% 30
+         )
+
+#HRK_optimal_dates
+
+HRK_fixed_dates &lt;- HRK_data_mod %&gt;%
+  #We filter so we only show the purchase and sale day for each year
+  filter(month == HRK_optimal_dates$optimal_purchase_month &amp; 
+           day == HRK_optimal_dates$optimal_purchase_day |
+           month == HRK_optimal_dates$optimal_sale_month &amp; 
+           day == HRK_optimal_dates$optimal_sale_day) %&gt;%
+  #Now we calculate the maximum currency value in the tourist season and the lowest in the off-season. These are our optimal buying / selling rates         
+  group_by(t_year, season) %&gt;% 
+  summarize(value = case_when(
+    season == &quot;Tourist_season&quot; ~ `Middle rate`,
+    season == &quot;Off_season&quot; ~ `Middle rate`),
+    # we also find the dates
+    date = case_when(
+      season == &quot;Tourist_season&quot; ~ Date,
+      season == &quot;Off_season&quot; ~ Date
+    ),
+    date_period = case_when(
+      season == &quot;Tourist_season&quot; ~ &quot;Sale_date&quot;,
+      season == &quot;Off_season&quot; ~ &quot;Purchase_date&quot;)) %&gt;%
+  pivot_wider(names_from = season, values_from = value) %&gt;%
+  pivot_wider(names_from = date_period, values_from = date) %&gt;% 
+  mutate_all(funs(ifelse(is.na(.), 0, .))) %&gt;% 
+  # We use summarize to create a new DF in which we have both the sale and purchase value in one row. We calculate the absolute gain and the % return, as well as how long we have held the position.
+ group_by(t_year) %&gt;% 
+  summarize(value_purchase = sum(Off_season),
+            value_sale = sum(Tourist_season),
+           diff = value_sale - value_purchase,
+           return = diff / value_purchase * 100
+            )
+
+HRK_fixed_dates %&gt;% 
+  kable(caption = &quot;TABLE 3.2: Annual returns from implementable trading strategy for HKR/EUR with entry date 2 February and exit date 18 August&quot;,
+             col.names = c(&quot;Tourism year&quot;, &quot;Purchase price&quot;,  &quot;Sale price&quot;, &quot;Absolute return&quot;, &quot;Return (%)&quot;),
+        digits = 4) %&gt;% 
+  kable_classic(&quot;striped&quot;, full_width = FALSE)</code></pre>
+<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+<caption>
+<span id="tab:unnamed-chunk-2">Table 2: </span>TABLE 3.2: Annual returns from implementable trading strategy for HKR/EUR with entry date 2 February and exit date 18 August
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+Tourism year
+</th>
+<th style="text-align:right;">
+Purchase price
+</th>
+<th style="text-align:right;">
+Sale price
+</th>
+<th style="text-align:right;">
+Absolute return
+</th>
+<th style="text-align:right;">
+Return (%)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+2005
+</td>
+<td style="text-align:right;">
+0.133
+</td>
+<td style="text-align:right;">
+0.137
+</td>
+<td style="text-align:right;">
+0.0039
+</td>
+<td style="text-align:right;">
+2.948
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2006
+</td>
+<td style="text-align:right;">
+0.136
+</td>
+<td style="text-align:right;">
+0.138
+</td>
+<td style="text-align:right;">
+0.0020
+</td>
+<td style="text-align:right;">
+1.464
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2007
+</td>
+<td style="text-align:right;">
+0.136
+</td>
+<td style="text-align:right;">
+0.137
+</td>
+<td style="text-align:right;">
+0.0018
+</td>
+<td style="text-align:right;">
+1.294
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:right;">
+0.138
+</td>
+<td style="text-align:right;">
+0.138
+</td>
+<td style="text-align:right;">
+0.0002
+</td>
+<td style="text-align:right;">
+0.150
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2009
+</td>
+<td style="text-align:right;">
+0.136
+</td>
+<td style="text-align:right;">
+0.136
+</td>
+<td style="text-align:right;">
+0.0008
+</td>
+<td style="text-align:right;">
+0.607
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2010
+</td>
+<td style="text-align:right;">
+0.137
+</td>
+<td style="text-align:right;">
+0.139
+</td>
+<td style="text-align:right;">
+0.0019
+</td>
+<td style="text-align:right;">
+1.395
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2011
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:right;">
+-0.0002
+</td>
+<td style="text-align:right;">
+-0.115
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2012
+</td>
+<td style="text-align:right;">
+0.132
+</td>
+<td style="text-align:right;">
+0.134
+</td>
+<td style="text-align:right;">
+0.0018
+</td>
+<td style="text-align:right;">
+1.374
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2013
+</td>
+<td style="text-align:right;">
+0.132
+</td>
+<td style="text-align:right;">
+0.133
+</td>
+<td style="text-align:right;">
+0.0012
+</td>
+<td style="text-align:right;">
+0.894
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2014
+</td>
+<td style="text-align:right;">
+0.131
+</td>
+<td style="text-align:right;">
+0.131
+</td>
+<td style="text-align:right;">
+0.0006
+</td>
+<td style="text-align:right;">
+0.458
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2015
+</td>
+<td style="text-align:right;">
+0.130
+</td>
+<td style="text-align:right;">
+0.132
+</td>
+<td style="text-align:right;">
+0.0020
+</td>
+<td style="text-align:right;">
+1.546
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2016
+</td>
+<td style="text-align:right;">
+0.131
+</td>
+<td style="text-align:right;">
+0.133
+</td>
+<td style="text-align:right;">
+0.0028
+</td>
+<td style="text-align:right;">
+2.136
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2017
+</td>
+<td style="text-align:right;">
+0.134
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:right;">
+0.0013
+</td>
+<td style="text-align:right;">
+0.981
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2018
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:right;">
+0.136
+</td>
+<td style="text-align:right;">
+0.0008
+</td>
+<td style="text-align:right;">
+0.574
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2019
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:right;">
+0.0007
+</td>
+<td style="text-align:right;">
+0.503
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>HRK_fixed_summary &lt;- HRK_fixed_dates %&gt;% 
+  summarize(median_return = median(return),
+            mean_return = mean(return),
+            sd_return = sd(return),
+            observations = n(),
+            se_return = sd_return / sqrt(observations),
+            t_critical = qt(0.975, observations-1),
+            MoE = t_critical * se_return,
+            LowerCI = mean_return - MoE,
+            UpperCI = mean_return + MoE)
+
+HRK_fixed_summary</code></pre>
+<pre><code>## # A tibble: 1 x 9
+##   median_return mean_return sd_return observations se_return t_critical   MoE
+##           &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;        &lt;int&gt;     &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;
+## 1         0.981        1.08     0.790           15     0.204       2.14 0.438
+## # ... with 2 more variables: LowerCI &lt;dbl&gt;, UpperCI &lt;dbl&gt;</code></pre>
+<pre class="r"><code>ggplot(HRK_fixed_summary, aes(x = &quot; &quot;,
+                              y = mean_return)) +
+  geom_errorbar(aes(ymin = LowerCI,
+                    ymax = UpperCI),
+                size = 2,
+                width = 0.1)+
+  geom_point()+
+  coord_cartesian(ylim = c(-1, 3))</code></pre>
+<p><img src="/projects/Currencytrade_files/figure-html/unnamed-chunk-4-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>```</p>
+</div>
+</div>
