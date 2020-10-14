@@ -132,7 +132,7 @@ HRK_data_optimal <- HRK_data_mod %>%
             position_days = date_sale - date_purchase
             )
 
-#let us display it in a nice table
+# Let us display it in a nice table
     
 HRK_data_optimal %>% 
   kable(caption = "TABLE xx: Annual returns from optimal trading strategy for HKR/EUR",
@@ -208,25 +208,40 @@ So with 95% confidence we can say the returns are significant (do note our obser
 
 ## Implementable strategy
 
-We just found the optimal strategy, but let us now try to do the same for the implementable strategy. What we can see in the first table we made (table 1.1) is that most purchase dates cluster around January and February, while most sales dates cluster around July and August. Let us therefore use the optimal trading dates we just found to find an entry and exit date for the position for every year.
+We just found the optimal strategy, but let us now try to do the same for the implementable strategy. What we can see in the first table we made (table 1.1) is that most purchase dates cluster around January and February, while most sales dates cluster around July and August. Let us therefore use the optimal trading dates we just found to find an entry and exit date for the position for every year. One way to do this would be to find the median date in the dataset.
 
 
-```{r}
+```{r optimal dates}
 
 HRK_optimal_dates <- HRK_data_optimal %>% 
-  #We want to convert the months and days for each optimal date into numbers (we do not care about the year). There is no mmdd format for lubridate, so instead we find the number of days in the year
+  # We want to convert the months and days for each optimal date into numbers (we do not care about the year). There is no mmdd format for lubridate, so instead we find the number of days in the year
   mutate(monthday_purchase = month(date_purchase) * 30 + day(date_purchase),
          monthday_sale = month(date_sale) * 30 + day(date_sale)) %>% 
+  #Next we find the median purchase and sales day
   summarize(median_purchase = median(monthday_purchase),
             median_sale = median(monthday_sale)) %>% 
-  mutate(optimal_purchase_month = month(median_purchase %/% 32, label = TRUE),
+  # Now we convert this back into a seperate month and day column
+  mutate(optimal_purchase_month = month(median_purchase %/% 30, label = TRUE),
          optimal_purchase_day = median_purchase %% 30,
          optimal_sale_month = month(median_sale %/% 30, label = TRUE),
          optimal_sale_day = median_sale %% 30
          )
+# Let us make a nice table for this, where we furthermore show concatenate the day and month for purchase and sale date
+ HRK_optimal_dates %>%
+   # We unite the columns of the month and day for sale and purchase and separate them with "-"
+   unite(purchase_date, c(optimal_purchase_month, optimal_purchase_day), sep = "-") %>% 
+   unite(sale_date, c(optimal_sale_month, optimal_sale_day), sep = "-") %>% 
+   # we only show the two dates
+ select(c(purchase_date, sale_date)) %>% 
+   #Makes a nice table
+kable(caption = "TABLE 2.1: Optimal dates for executing trade",
+             col.names = c("Optimal purchase date", "Optimal sale date")) %>% 
+  kable_classic("striped", full_width = FALSE) 
+```
 
-#HRK_optimal_dates
+We've now found the optimal dates for executing the trade every year. Let us see what the returns will be.
 
+```{r implementable strategy}
 HRK_fixed_dates <- HRK_data_mod %>%
   #We filter so we only show the purchase and sale day for each year
   filter(month == HRK_optimal_dates$optimal_purchase_month & 
@@ -246,30 +261,56 @@ HRK_fixed_dates <- HRK_data_mod %>%
     date_period = case_when(
       season == "Tourist_season" ~ "Sale_date",
       season == "Off_season" ~ "Purchase_date")) %>%
+  # We use pivot wider to make the data tidy, i.e. we want to have one row for each year with a value for sale and value for purchase, so we can subtract those two later
   pivot_wider(names_from = season, values_from = value) %>%
-  pivot_wider(names_from = date_period, values_from = date) %>% 
+  pivot_wider(names_from = date_period, values_from = date) %>% #makes NAs be equal to 0
   mutate_all(funs(ifelse(is.na(.), 0, .))) %>% 
-  # We use summarize to create a new DF in which we have both the sale and purchase value in one row. We calculate the absolute gain and the % return, as well as how long we have held the position.
+  # We calculate the absolute gain and the % return
  group_by(t_year) %>% 
   summarize(value_purchase = sum(Off_season),
             value_sale = sum(Tourist_season),
            diff = value_sale - value_purchase,
            return = diff / value_purchase * 100
             )
-
+# Let us visualize it in a graph
 HRK_fixed_dates %>% 
-  kable(caption = "TABLE 3.2: Annual returns from implementable trading strategy for HKR/EUR with entry date 2 February and exit date 18 August",
-             col.names = c("Tourism year", "Purchase price",  "Sale price", "Absolute return", "Return (%)"),
-        digits = 4) %>% 
-  kable_classic("striped", full_width = FALSE)
-  
-
-
-
-
+  ggplot(aes(x = t_year,
+             y = return))+
+  # Adds columns
+  geom_col(fill = "Purple3")+
+  #Theme for plot
+  theme_bw()+
+  #We add a horizontal red line that represents the mean return over the years
+  geom_hline(yintercept = mean(HRK_fixed_dates$return),
+             color = "Red")+
+  #We add labels to the columns...
+  geom_text(aes(label = format(round(return, digits = 1), nsmall = 1)), 
+            vjust = -0.5, 
+            size = 3)+
+  # ... And a label for the horizontal mean line
+   geom_text(aes(2020,
+                 mean(return),
+                 label = format(round(mean(return), digits = 1), nsmall = 1),
+                 vjust = -1),
+             size = 3,
+             color = "red")+
+  #Finally we add titles to the plot
+  labs(title = "The implementable strategy has on average given an annual return of 1%",
+       subtitle = "Only 2011 resulted in negative return",
+       caption = "Source: Croation National Bank (https://hnb.hr/en)",
+       x = "Year",
+       y = "Return (%)")+
+  # Graphical tweaks - the scale_y_continous makes sure the columns are not floating on the x-axis.
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
+  scale_x_continuous(limits = c(2004,2020), 
+                     breaks = seq(2005,2019,  by = 1))+
+  theme(axis.text = element_text(size = 8))
 ```
+So the strategy seems to work consistently, albeit the returns are slightly low. Let us check how a confidence interval would look for this data.
+
 ```{r}
 HRK_fixed_summary <- HRK_fixed_dates %>% 
+  #we calculate what we need for a confidence interval
   summarize(median_return = median(return),
             mean_return = mean(return),
             sd_return = sd(return),
@@ -278,23 +319,18 @@ HRK_fixed_summary <- HRK_fixed_dates %>%
             t_critical = qt(0.975, observations-1),
             MoE = t_critical * se_return,
             LowerCI = mean_return - MoE,
-            UpperCI = mean_return + MoE)
+            UpperCI = mean_return + MoE) %>% 
+  # let us only show the mean and the confidence interval
+  select(c(mean_return, LowerCI, UpperCI)) %>% 
+  kable(caption = "TABLE 2.2: Confidence interval for implementable trade",
+             col.names = c("Mean return (%)", "Lower CI (%)", "Upper CI (%)"),
+        digits = 2) %>% 
+  kable_classic("striped", full_width = FALSE) 
 
 HRK_fixed_summary
 ```
+Here we see a lower return than the optimal strategy, but still a significant positive return, as the CI does not include 0.
 
-```{r}
-ggplot(HRK_fixed_summary, aes(x = " ",
-                              y = mean_return)) +
-  geom_errorbar(aes(ymin = LowerCI,
-                    ymax = UpperCI),
-                size = 2,
-                width = 0.1)+
-  geom_point()+
-  coord_cartesian(ylim = c(-1, 3))
-```
+## Conclusion (and reflections on R)
 
-
-```
-
-
+This was my first real applied data science project, i.e. a project where I had not been given instructions to use R but rather did it because the analysis would be easier to do and easier to replicate than in e.g. Excel. I think it is interesting how the business world has almost unanimously decided that Excel is the go-to software for data analytics. Don't get me wrong, Excel is very good since it is much more visual than R, so it is easier for people with no coding experience to follow along excel easier. However, the replicability for excel is much lower than R, and excel does not work well with dataframes that are continuously updated (as some data cleaning may have to be done manually). Having learned basic R now, I look back and shiver at my former student jobs where I updated dashboards by manually copy-pasting and deleting different rows.
