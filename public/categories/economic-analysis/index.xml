@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Economic analysis on Forty</title>
+    <link>/categories/economic-analysis/</link>
+    <description>Recent content in Economic analysis on Forty</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 15 Oct 2020 22:26:09 -0500</lastBuildDate><atom:link href="/categories/economic-analysis/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Nordic GDP composition</title>
+      <link>/projects/nordic-gdp/</link>
+      <pubDate>Thu, 15 Oct 2020 22:26:09 -0500</pubDate>
+      
+      <guid>/projects/nordic-gdp/</guid>
+      <description>Nordic GDP compositionA
+UN_GDP_data &amp;lt;- read_excel(here::here(&amp;quot;data&amp;quot;, &amp;quot;Download-GDPconstant-USD-countries.xls&amp;quot;), # Excel filenamesheet=&amp;quot;Download-GDPconstant-USD-countr&amp;quot;, # Sheet nameskip=2) # Number of rows to skipskim(UN_GDP_data)(#tab:read_GDP_data)Data summaryNameUN_GDP_dataNumber of rows3685Number of columns51_______________________Column type frequency:character2numeric49________________________Group variablesNoneVariable type: character</description>
+    </item>
+    
+  </channel>
+</rss>

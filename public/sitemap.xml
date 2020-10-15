@@ -3,13 +3,48 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/projects/currencytrade/</loc>
-    <lastmod>2020-10-12T22:26:09-05:00</lastmod>
+    <loc>/categories/applied-data-analytics/</loc>
+    <lastmod>2020-10-16T22:26:09-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/</loc>
+    <lastmod>2020-10-16T22:26:09-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/projects/currency-trade/</loc>
+    <lastmod>2020-10-16T22:26:09-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/finance/</loc>
+    <lastmod>2020-10-16T22:26:09-05:00</lastmod>
   </url>
   
   <url>
     <loc>/</loc>
-    <lastmod>2020-10-12T22:26:09-05:00</lastmod>
+    <lastmod>2020-10-16T22:26:09-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/economic-analysis/</loc>
+    <lastmod>2020-10-15T22:26:09-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/projects/nordic-gdp/</loc>
+    <lastmod>2020-10-15T22:26:09-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/covid/</loc>
+    <lastmod>2020-10-13T22:26:09-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/projects/covid-bike-analysis/</loc>
+    <lastmod>2020-10-13T22:26:09-05:00</lastmod>
   </url>
   
   <url>
@@ -38,18 +73,8 @@
   </url>
   
   <url>
-    <loc>/projects/nordicgdp/</loc>
-    <lastmod>2017-10-31T22:26:09-05:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/blogs/ipsum/</loc>
     <lastmod>2017-10-31T21:28:43-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/</loc>
-    <lastmod>2015-07-23T21:13:14-05:00</lastmod>
   </url>
   
   <url>

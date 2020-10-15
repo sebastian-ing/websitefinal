@@ -1,0 +1,233 @@
+---
+categories:
+- "Covid"
+date: "2020-10-13T22:26:09-05:00"
+description: An analysis on covid's effect on Santander bike use
+draft: false
+image: pic09.jpg
+keywords: ""
+slug: covid-bike-analysis
+title: COVID and Santander bikes
+---
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+# COVID and its effect on bike rentals
+A very common (and pleasant) sight in London are its Santander bikes which can be rented fairly cheap and be ridden all around the city. This data science project will analyze how the development in bike rentals have progressed over the past couple of years and in particular how COVID affected the number of rentals during the lockdown.
+
+To help us with the analysis, let us first load the following packages.
+
+```{r load-libraries, include=TRUE}
+library(tidyverse)
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(here)
+library(skimr)
+library(janitor)
+library(httr)
+library(readxl)
+library(vroom)
+library(scales)
+library(RColorBrewer)
+library(knitr)
+library(kableExtra)
+```
+
+
+The data on bike rentals is published by the mayor of London. We can get the latest data by running the following.
+
+```{r, get_tfl_data, cache=TRUE}
+url <- "https://data.london.gov.uk/download/number-bicycle-hires/ac29363e-e0cb-47cc-a97a-e216d900a6b0/tfl-daily-cycle-hires.xlsx"
+
+# Download TFL data to temporary file
+httr::GET(url, write_disk(bike.temp <- tempfile(fileext = ".xlsx")))
+
+# Use read_excel to read it as dataframe
+bike0 <- read_excel(bike.temp,
+                   sheet = "Data",
+                   range = cell_cols("A:B"))
+
+# change dates to get year, month, and week
+bike <- bike0 %>% 
+  clean_names() %>% 
+  rename (bikes_hired = number_of_bicycle_hires) %>% 
+  mutate (year = year(day),
+          month = lubridate::month(day, label = TRUE),
+          week = isoweek(day))
+```
+
+
+Let us first just look at the number of rentals during for each month and year.
+
+```{r tfl_month_year_grid_reproduced}
+
+bike_1520 <- bike %>% 
+  filter(year >= 2015) 
+
+# Creates function for number format on x-axis
+ks <- function (x) { number_format(accuracy = 1,
+                                   scale = 1/1000,
+                                   suffix = "k",
+                                   big.mark = ",")(x) }
+
+ggplot(bike_1520, aes(x = bikes_hired))+
+  geom_density()+
+  # Splits into grid with years as rows and months as columns
+  facet_grid(rows = vars(year), cols = vars(month))+
+  theme_minimal()+
+  labs(title = "Distribution of bikes hired per month",
+       x = "Bike Rentals",
+       y = "")+
+  theme(axis.text  = element_text(size = 6),
+        axis.text.y = element_blank())+
+  scale_x_continuous(labels = ks)
+
+```
+
+If we look at May and June in 2020 relative to the other years we see the standard deviation is higher and the distribution is slightly skewed to the left. Obviously this is because of COVID, where the lockdown have resulted in fewer rentals.
+
+
+Next, let us look at the period 2015-2020. We would like to see how each month each year has deviated from the average of that month. To do this, let us create a graph with four main elements:
+
+* A blue line which shows the mean value for each month through the whole period. This is the same for every year and is our expected number of monthly rentals
+
+* A black line which shows the actual number of rentals for each month and year
+
+* The area between the two lines, where the expected value is **more** than the actual value - we will color this red (as this is a negative deviation from our expectations)
+
+* The area between the two lines, where the expected value is **less** than the actual value - we will color this green (as this is a positive deviation from our expectations)
+
+To achieve this, we first calculate the two variables,expected value (let's call it `mean_bike`) and the actual value (`bike_hired`), then we create a plot with two lines based on the two variables using geom_line, and then we color the two areas using `geom_ribbon`.
+
+```{r monthly bike rental}
+# First we find the average for each month throughout the whole period
+bike_avg <- bike %>% 
+  filter(year %in% c(2015:2019)) %>% 
+  group_by(month) %>% 
+  summarize(mean_bike = mean(bikes_hired)) 
+
+# Now we then find the average for each month
+bike_ribbon <- bike %>% 
+  filter(year >= 2015,
+         day < "2020-08-01") %>% 
+  group_by(month, year) %>% 
+  summarize(bikes_hired_mth = mean(bikes_hired)) %>%
+  # We then join the two data tables
+  left_join(y = bike_avg, join_by =  month) 
+
+#Now we then recreate the graph
+
+ggplot(bike_ribbon, aes(x = month, 
+                        y = mean_bike,
+                        group = 1))+
+  # We split the plot into 5 graphs - one for each year  
+  facet_wrap(~year)+
+  # We create two lines, one for the mean bikes hired per month over the whole period and one for the year in question
+  geom_line(aes(y = mean_bike), color = "Dark Blue")+
+  geom_line(aes(y = bikes_hired_mth), color = "Black")+
+  # We then create two ribbons. The first colors the area at which mean_bike > bikes_hired_mth red, while the second colors the area where mean_bike > bikes_hired_mth green
+  geom_ribbon(aes(ymin = mean_bike, 
+                  ymax = pmin(mean_bike, bikes_hired_mth)), 
+              fill = "Red",
+              alpha = 0.2)+
+  geom_ribbon(aes(ymin = bikes_hired_mth, 
+                  ymax = pmin(mean_bike, bikes_hired_mth)),
+              fill = "Green",
+              alpha = 0.2)+
+ # We finally add titles and change the aesthetics of the graph
+  labs(title = "Monthly changes in TfL bike rentals",
+       subtitle = "Change from monthly average shown in blue \nand calculated between 2015 and 2019",
+       x = "",
+       y = "Bike rentals",
+       caption = "Source: TfL, London Data Store")+
+  theme_minimal()
+  
+
+
+
+
+```
+
+You can easily see when the lockdown happened by the large deviation for 2020. Although interestingly enough people rented more bikes than was expected during the summer months. Maybe they were using bikes instead of the tube - or maybe they just missed biking.
+
+Next let us create a chart which looks at the weekly deviations. Instead of absolute numbers, let us see how many % they deviate from our expected number of rentals. Again here we want a line showing the actual number of rentals, and a colored area of either green or red for the difference between that and the expected value. Let's also add a gray background to distinguish between quarters and colored tickmarks to show whether a particular week was over or under the expected value.
+
+Let us try to solve this challenge step by step.
+
+```{r weekly bike rental}
+# As before we start by creating a dataframe with the average values weekly rental values throughout 2015-2019
+bike_avg_wk <- bike %>% 
+  filter(year %in% c(2015:2019)) %>% 
+  group_by(week) %>% 
+  summarize(mean_bike_wk = mean(bikes_hired)) 
+
+# We then find the actual weekly values for each week each year and join the data table we created before
+bike_ribbon_wk <- bike %>% 
+  filter(year >= 2015,
+         day < "2020-08-01") %>% 
+  group_by(week, year) %>% 
+  summarize(bikes_hired_wk = mean(bikes_hired)) %>%
+  left_join(y = bike_avg_wk, join_by =  week) %>% 
+  # Finally we calculate the difference from the weekly change in a new column
+  mutate(deltapct_bike_wk = (bikes_hired_wk - mean_bike_wk) / mean_bike_wk)
+
+
+
+# We now create the graph
+ggplot(bike_ribbon_wk, aes(x = week,
+                           y = deltapct_bike_wk))+
+  facet_wrap(~year)+
+  # We add the line showing development during the year
+  geom_line()+
+  # We use two geom_ribbon to color the area above and below the line. We use the delta as one argument and 0 as the other, as if the actual value = expected value, we would have a delta of 0.
+  geom_ribbon(aes(ymin = 0, 
+                  ymax = pmin(deltapct_bike_wk, 0)), 
+              fill = "Red",
+              alpha = 0.3)+
+  geom_ribbon(aes(ymin = deltapct_bike_wk, 
+                  ymax = pmin(deltapct_bike_wk, 0)),
+              fill = "Green",
+              alpha = 0.3)+
+  # We then add the rectangular fills for the different quarters - first we define the areas we want colored and then we define the colors used
+  geom_tile(aes(fill = week %in% c(14:26, 40:53)),
+            width = 1,
+            height = Inf,
+            alpha = 0.25,
+            show.legend = FALSE)+
+  scale_fill_manual(values = c("white", "gray"))+
+  #Now we add the tick marks and color them
+  geom_rug(sides = "b", 
+           aes(color = ifelse(deltapct_bike_wk > 0, "Above", "Below")),
+           show.legend = FALSE)+
+  scale_colour_manual(values = c("#7DCD85", "#CB454A"), guide = FALSE)+
+   # Finally we fix the aesthetics of the graph
+  scale_y_continuous(labels = percent)+
+  scale_x_continuous(breaks = c(13, 26, 39, 53))+
+  labs(title = "Weekly changes in TfL bike rentals",
+       subtitle = "Change from weekly averages  \ncalculated between 2015 and 2019",
+       x = "Week",
+       y = "",
+       caption = "Source: TfL, London Data Store")+
+  theme_minimal()
+
+```
+
+Here we have used mean instead of median. When deciding on this the main consideration to take into account is how the difference is between the weekend and the week. Intuitively, we would expect every weekday to have fairly similar rental numbers, while the weekends would be either significantly higher or lower. When using median, this would not be taken into account, as one would most likely end with a weekday value (as there are five of them and they are similar). We have therefore included the mean, as we would like to take the weekend number deviations into account.
+
+As before we see a very large decrease in the weekly rentals during the lockdown, particularly in the begining of it where it fell by approximately 60% - quite dramatic!
+
+This concludes our short analysis of the Santander bike rentals.

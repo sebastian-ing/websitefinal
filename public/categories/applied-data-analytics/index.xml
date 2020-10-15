@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Applied data analytics on Forty</title>
+    <link>/categories/applied-data-analytics/</link>
+    <description>Recent content in Applied data analytics on Forty</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 16 Oct 2020 22:26:09 -0500</lastBuildDate><atom:link href="/categories/applied-data-analytics/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Currency trade</title>
+      <link>/projects/currency-trade/</link>
+      <pubDate>Fri, 16 Oct 2020 22:26:09 -0500</pubDate>
+      
+      <guid>/projects/currency-trade/</guid>
+      <description>Using R to study a potential currency tradeThe inspiration for this post actually comes from a trading strategy project I was doing in my investment fundamental course. I would normally have used excel for this type of analysis, but I decided to try R and I found it to be much more powerful at analyzing the trading strategy than excel would have been. Before we start the analysis, let us look at the background of the trading strategy.</description>
+    </item>
+    
+  </channel>
+</rss>

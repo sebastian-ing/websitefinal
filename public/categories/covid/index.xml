@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Covid on Forty</title>
+    <link>/categories/covid/</link>
+    <description>Recent content in Covid on Forty</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 13 Oct 2020 22:26:09 -0500</lastBuildDate><atom:link href="/categories/covid/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>COVID and Santander bikes</title>
+      <link>/projects/covid-bike-analysis/</link>
+      <pubDate>Tue, 13 Oct 2020 22:26:09 -0500</pubDate>
+      
+      <guid>/projects/covid-bike-analysis/</guid>
+      <description>COVID and its effect on bike rentalsA very common (and pleasant) sight in London are its Santander bikes which can be rented fairly cheap and be ridden all around the city. This data science project will analyze how the development in bike rentals have progressed over the past couple of years and in particular how COVID affected the number of rentals during the lockdown.
+To help us with the analysis, let us first load the following packages.</description>
+    </item>
+    
+  </channel>
+</rss>

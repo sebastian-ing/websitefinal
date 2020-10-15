@@ -6,7 +6,43 @@
     <description>Recent content in Categories on Forty</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 23 Jul 2015 21:13:14 -0500</lastBuildDate><atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 16 Oct 2020 22:26:09 -0500</lastBuildDate><atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Applied data analytics</title>
+      <link>/categories/applied-data-analytics/</link>
+      <pubDate>Fri, 16 Oct 2020 22:26:09 -0500</pubDate>
+      
+      <guid>/categories/applied-data-analytics/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Finance</title>
+      <link>/categories/finance/</link>
+      <pubDate>Fri, 16 Oct 2020 22:26:09 -0500</pubDate>
+      
+      <guid>/categories/finance/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Economic analysis</title>
+      <link>/categories/economic-analysis/</link>
+      <pubDate>Thu, 15 Oct 2020 22:26:09 -0500</pubDate>
+      
+      <guid>/categories/economic-analysis/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Covid</title>
+      <link>/categories/covid/</link>
+      <pubDate>Tue, 13 Oct 2020 22:26:09 -0500</pubDate>
+      
+      <guid>/categories/covid/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>R</title>
       <link>/categories/r/</link>

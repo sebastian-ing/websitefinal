@@ -6,14 +6,34 @@
     <description>Recent content on Forty</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 12 Oct 2020 22:26:09 -0500</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 16 Oct 2020 22:26:09 -0500</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Currency trade</title>
-      <link>/projects/currencytrade/</link>
-      <pubDate>Mon, 12 Oct 2020 22:26:09 -0500</pubDate>
+      <link>/projects/currency-trade/</link>
+      <pubDate>Fri, 16 Oct 2020 22:26:09 -0500</pubDate>
       
-      <guid>/projects/currencytrade/</guid>
+      <guid>/projects/currency-trade/</guid>
       <description>Using R to study a potential currency tradeThe inspiration for this post actually comes from a trading strategy project I was doing in my investment fundamental course. I would normally have used excel for this type of analysis, but I decided to try R and I found it to be much more powerful at analyzing the trading strategy than excel would have been. Before we start the analysis, let us look at the background of the trading strategy.</description>
+    </item>
+    
+    <item>
+      <title>Nordic GDP composition</title>
+      <link>/projects/nordic-gdp/</link>
+      <pubDate>Thu, 15 Oct 2020 22:26:09 -0500</pubDate>
+      
+      <guid>/projects/nordic-gdp/</guid>
+      <description>Nordic GDP compositionA
+UN_GDP_data &amp;lt;- read_excel(here::here(&amp;quot;data&amp;quot;, &amp;quot;Download-GDPconstant-USD-countries.xls&amp;quot;), # Excel filenamesheet=&amp;quot;Download-GDPconstant-USD-countr&amp;quot;, # Sheet nameskip=2) # Number of rows to skipskim(UN_GDP_data)(#tab:read_GDP_data)Data summaryNameUN_GDP_dataNumber of rows3685Number of columns51_______________________Column type frequency:character2numeric49________________________Group variablesNoneVariable type: character</description>
+    </item>
+    
+    <item>
+      <title>COVID and Santander bikes</title>
+      <link>/projects/covid-bike-analysis/</link>
+      <pubDate>Tue, 13 Oct 2020 22:26:09 -0500</pubDate>
+      
+      <guid>/projects/covid-bike-analysis/</guid>
+      <description>COVID and its effect on bike rentalsA very common (and pleasant) sight in London are its Santander bikes which can be rented fairly cheap and be ridden all around the city. This data science project will analyze how the development in bike rentals have progressed over the past couple of years and in particular how COVID affected the number of rentals during the lockdown.
+To help us with the analysis, let us first load the following packages.</description>
     </item>
     
     <item>
@@ -41,16 +61,6 @@
       
       <guid>/blogs/magna/</guid>
       <description></description>
-    </item>
-    
-    <item>
-      <title>Nordic GDP composition</title>
-      <link>/projects/nordicgdp/</link>
-      <pubDate>Tue, 31 Oct 2017 22:26:09 -0500</pubDate>
-      
-      <guid>/projects/nordicgdp/</guid>
-      <description>Nordic GDP compositionA
-UN_GDP_data &amp;lt;- read_excel(here::here(&amp;quot;data&amp;quot;, &amp;quot;Download-GDPconstant-USD-countries.xls&amp;quot;), # Excel filenamesheet=&amp;quot;Download-GDPconstant-USD-countr&amp;quot;, # Sheet nameskip=2) # Number of rows to skipskim(UN_GDP_data)(#tab:read_GDP_data)Data summaryNameUN_GDP_dataNumber of rows3685Number of columns51_______________________Column type frequency:character2numeric49________________________Group variablesNoneVariable type: character</description>
     </item>
     
     <item>

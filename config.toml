@@ -95,19 +95,19 @@ disqusShortname = ""
       title = "Croatian currency trade"
       subtitle = "Analyzing potential currency trade between the Crotian Kuna and the Euro"
       image = "pic09.jpg"
-      url = "projects/currencytrade"
+      url = "projects/currency-trade"
 
     [[params.tiles.showcase]]
       title = "Nordic GDP composition"
       subtitle = "Analysis of the three Nordic economies"
       image = "flags.jpg"
-      url = "projects/nordicgdp"
+      url = "projects/nordic-gdp"
 
     [[params.tiles.showcase]]
-      title = "Magna"
-      subtitle = "Lorem Etiam Nullam"
+      title = "Santander bike rentals"
+      subtitle = "Analysis of COVID's effect on bike rentals in London"
       image = "pic03.jpg"
-      url = "blogs/magna"
+      url = "projects/covid-bike-analysis"
 
     [[params.tiles.showcase]]
       title = "Ipsum"
