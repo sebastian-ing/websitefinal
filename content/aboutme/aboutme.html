@@ -1,0 +1,552 @@
+---
+categories:
+- "Social media"
+date: "2020-10-14T22:26:09-05:00"
+description: Analyzing how you can use boostrapping in R using data from social media survey
+draft: false
+image: socialmedia.jpg
+keywords: ""
+slug: confidence-intervals
+title: Confidence intervals using boostrapping and formulas
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+<link href="/rmarkdown-libs/lightable/lightable.css" rel="stylesheet" />
+
+
+<style>
+table {
+  background-color: white !important;
+  color: black !important;
+}
+</style>
+<div id="bootstrap-method" class="section level1">
+<h1>Bootstrap method</h1>
+<p>The way I initially learned to do confidence intervals for populations was to use the formula. It is a (somewhat) complicated formula, where you would take a point estimate (often the mean), adding and subtracting some margin of error. The margin of error depends on the standard deviation (the higher the standard deviation, the higher the standard error), how confident we want to be in the interval (a 99% confidence interval will have a higher standard error than a 95%), and the number of observations (if we have a lot of data points, we can be more sure).</p>
+<p>However, another way to find a confidence interval is using the bootstrap method. This approach is more inductive rather than the formula which is more deductive. Using boostraping we have a sample and we find random observations, note them down, and do that over and over (we can pick the same observations). After that we can look at a distribution of the means we have found and create a 95% confidence interval where we see 95% of the observations.</p>
+<p>I will show how both the formula and the boostrapping method can be used to construct intervals. To help us we will use the <a href="http://www.gss.norc.org/">General Social Survey (GSS)</a>, which gathers data on American society in order to monitor and explain trends in attitudes, behaviours, and attributes. Many trends have been tracked for decades, so one can see the evolution of attitudes, etc in American Society.
+We will use the following packages (infer being particularly important as this allows us to do boostrapping):</p>
+<pre class="r"><code>library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(here)
+library(skimr)
+library(janitor)
+library(httr)
+library(readxl)
+library(vroom)
+library(infer)
+library(scales)
+library(RColorBrewer)
+library(knitr)
+library(kableExtra)
+library(countrycode)</code></pre>
+<div id="data-cleaning" class="section level2">
+<h2>Data cleaning</h2>
+<p>In this project we analyze data from the <strong>2016 GSS sample data</strong>, using it to estimate values of <em>population parameters</em> of interest about US adults. The GSS sample data file has 2867 observations of 935 variables, but we are only interested in very few of these variables and we are therefore using a smaller file.</p>
+<pre class="r"><code>gss &lt;- read_csv(here::here(&quot;data&quot;, &quot;smallgss2016.csv&quot;), 
+               # We specify what will be NA values
+                 na = c(&quot;&quot;, &quot;Don&#39;t know&quot;,
+                       &quot;No answer&quot;, &quot;Not applicable&quot;))</code></pre>
+<p>Notice that many responses should not be taken into consideration, like “No Answer”, “Don’t Know”, “Not applicable”, “Refused to Answer”.</p>
+<p>We will be creating 95% confidence intervals for population parameters. The variables we have are the following:</p>
+<ul>
+<li>hours and minutes spent on email weekly. The responses to these questions are recorded in the <code>emailhr</code> and <code>emailmin</code> variables. For example, if the response is 2.50 hours, this would be recorded as emailhr = 2 and emailmin = 30.</li>
+<li><code>snapchat</code>, <code>instagrm</code>, <code>twitter</code>: whether respondents used these social media in 2016</li>
+<li><code>sex</code>: Female - Male</li>
+<li><code>degree</code>: highest education level attained</li>
+</ul>
+</div>
+<div id="instagram-and-snapchat-by-sex" class="section level2">
+<h2>Instagram and Snapchat, by sex</h2>
+<p>Let us attempt to estimate the <em>population</em> proportion of Snapchat or Instagram users in 2016.</p>
+<p>We will do this by:</p>
+<ol style="list-style-type: decimal">
+<li>Creating a new variable, <code>snap_insta</code> that is <em>Yes</em> if the respondent reported using any of Snapchat (<code>snapchat</code>) <strong>OR</strong> Instagram (<code>instagrm</code>), and <em>No</em> if not. If the recorded value was NA for both of these questions, the value in the new variable should also be NA.</li>
+</ol>
+<pre class="r"><code># First we add a new column called snap_insta where if either snap or insta is true, we put &quot;Yes&quot;, if both are no we put &quot;No&quot;, and otherwise &quot;NA&quot;
+Gss_mod &lt;- gss %&gt;%
+  mutate(snap_insta = case_when(
+    snapchat == &quot;Yes&quot; | instagrm == &quot;Yes&quot; ~ &quot;Yes&quot;, 
+    snapchat == &quot;No&quot; &amp; instagrm == &quot;No&quot; ~ &quot;No&quot;, 
+    TRUE ~ &quot;NA&quot;))</code></pre>
+<ol style="list-style-type: decimal">
+<li>Calculating the proportion of Yes’s for <code>snap_insta</code> among those who answered the question, i.e. excluding NAs.</li>
+</ol>
+<pre class="r"><code># We calculate the proportion
+proportion_gss &lt;- Gss_mod %&gt;%
+  #We get rid of NA values
+  filter(snap_insta != &quot;NA&quot;) %&gt;% 
+  group_by(snap_insta) %&gt;%
+  #We find number of observations for &quot;Yes&quot; and &quot;No&quot;
+  count() %&gt;%
+  ungroup() %&gt;% 
+  mutate(proportion = n/sum(n)) %&gt;% 
+  # Fixes table
+kable(caption = &quot;TABLE 1.1: Proportion of people using snapchat or instagram&quot;,
+             col.names = c(&quot;Uses snapchat or instagram?&quot;, &quot;Observations&quot;, &quot;Proportion&quot;)) %&gt;% 
+  kable_classic(&quot;basic&quot;, full_width = FALSE) 
+
+proportion_gss</code></pre>
+<table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+<caption>
+<span id="tab:unnamed-chunk-1">Table 1: </span>TABLE 1.1: Proportion of people using snapchat or instagram
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Uses snapchat or instagram?
+</th>
+<th style="text-align:right;">
+Observations
+</th>
+<th style="text-align:right;">
+Proportion
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+No
+</td>
+<td style="text-align:right;">
+858
+</td>
+<td style="text-align:right;">
+0.625
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Yes
+</td>
+<td style="text-align:right;">
+514
+</td>
+<td style="text-align:right;">
+0.375
+</td>
+</tr>
+</tbody>
+</table>
+<ol style="list-style-type: decimal">
+<li>Using the CI formula for proportions, we will construct 95% CIs for men and women who used either Snapchat or Instagram</li>
+</ol>
+<pre class="r"><code># Now we do the same as above but for women and men
+proportion_ci &lt;- Gss_mod %&gt;%
+  filter(snap_insta != &quot;NA&quot;) %&gt;% 
+  group_by(snap_insta, sex) %&gt;%
+  count()  %&gt;% 
+  group_by(sex) %&gt;% 
+  mutate(proportion = n / sum(n)) %&gt;% 
+  # Finally we only show values for yes
+  filter(snap_insta == &quot;Yes&quot;) %&gt;% 
+  # We summarise and calculate CI for the proportion
+  summarise(proportion = proportion,
+            se_proportion = sqrt(proportion * (1 - proportion) / n), 
+              margin_of_error = 1.96* se_proportion, 
+              CI_low = proportion - margin_of_error, 
+              CI_high = proportion + margin_of_error
+            ) %&gt;% 
+  kable(caption = &quot;TABLE 1.2: Proportion of people using snapchat or instagram based on gender&quot;,
+             col.names = c(&quot;Gender&quot;, &quot;Proportion of yes&quot;, &quot;Standard error&quot;, &quot;margin of error&quot;, &quot;Lower CI&quot;, &quot;Upper CI&quot;)) %&gt;% 
+  kable_classic(&quot;striped&quot;, full_width = FALSE)
+
+proportion_ci</code></pre>
+<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+<caption>
+<span id="tab:instasnap">Table 2: </span>TABLE 1.2: Proportion of people using snapchat or instagram based on gender
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Gender
+</th>
+<th style="text-align:right;">
+Proportion of yes
+</th>
+<th style="text-align:right;">
+Standard error
+</th>
+<th style="text-align:right;">
+margin of error
+</th>
+<th style="text-align:right;">
+Lower CI
+</th>
+<th style="text-align:right;">
+Upper CI
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Female
+</td>
+<td style="text-align:right;">
+0.419
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+0.054
+</td>
+<td style="text-align:right;">
+0.365
+</td>
+<td style="text-align:right;">
+0.473
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male
+</td>
+<td style="text-align:right;">
+0.318
+</td>
+<td style="text-align:right;">
+0.034
+</td>
+<td style="text-align:right;">
+0.066
+</td>
+<td style="text-align:right;">
+0.253
+</td>
+<td style="text-align:right;">
+0.384
+</td>
+</tr>
+</tbody>
+</table>
+<p>There appears to be a larger share of females relative to males using instagram or snapchat, but given the two confidence intervals overlap, we are unable to make a definite conclusion on whether there is a signifianct difference between the two.</p>
+</div>
+<div id="twitter-by-education-level" class="section level2">
+<h2>Twitter, by education level</h2>
+<p>Let us now try to estimate the <em>population</em> proportion of Twitter users by education level in 2016.</p>
+<p>There are 5 education levels in variable <code>degree</code> which, in ascending order of years of education, are Lt high school, High School, Junior college, Bachelor, Graduate. Let us now go through a couple of steps to try and estimate the population proportion</p>
+<ol style="list-style-type: decimal">
+<li>Turn <code>degree</code> from a character variable into a factor variable. Make sure the order is the correct one and that levels are not sorted alphabetically which is what R by default does.</li>
+</ol>
+<pre class="r"><code>Gss_mod2 &lt;- Gss_mod 
+# Changes degree into factor
+Gss_mod2$degree &lt;- as.factor(Gss_mod2$degree) %&gt;%  
+  #reorders factor
+  factor(levels = c(&quot;Lt high school&quot;, &quot;High school&quot;, &quot;Junior college&quot;, &quot;Bachelor&quot;, &quot;Graduate&quot;, &quot;NA&quot;)) </code></pre>
+<ol style="list-style-type: decimal">
+<li>Create a new variable, <code>bachelor_graduate</code> that is <em>Yes</em> if the respondent has either a <code>Bachelor</code> or <code>Graduate</code> degree. As before, if the recorded value for either was NA, the value in your new variable should also be NA.</li>
+</ol>
+<pre class="r"><code>Gss_mod2 &lt;- Gss_mod2 %&gt;%
+  mutate(bachelor_graduate = case_when(
+    # Case when column should return yes
+    degree == &quot;Bachelor&quot; | degree == &quot;Graduate&quot; ~ &quot;Yes&quot;,
+    #Case when column should return no
+    degree == &quot;High school&quot; | degree == &quot;Junior college&quot; | degree == &quot;Lt high school&quot; ~ &quot;No&quot;, 
+    # Case when column should return NA (all remaining values)
+    TRUE ~ &quot;NA&quot;))</code></pre>
+<ol style="list-style-type: decimal">
+<li>Calculate the proportion of <code>bachelor_graduate</code> who do (Yes) and who don’t (No) use twitter.</li>
+</ol>
+<pre class="r"><code>proportion_gss2 &lt;- Gss_mod2 %&gt;%
+  # Removes NA observations
+  filter(bachelor_graduate != &quot;NA&quot;,
+         twitter != &quot;NA&quot;) %&gt;% 
+  #calculates proportions 
+  group_by(bachelor_graduate, twitter) %&gt;%
+  #We count the observatoins
+  count() %&gt;%
+  ungroup() %&gt;% 
+  group_by(bachelor_graduate) %&gt;% 
+  # We find the proportion
+  mutate(proportion2 = n/sum(n)) %&gt;%
+  #We will only look at bachelor and graduates
+  filter(bachelor_graduate != &quot;No&quot;) %&gt;%
+  #fixes aesthetics
+  kable(caption = &quot;TABLE 1.3: Proportion of people using twitter with bachelor or graduate degrees&quot;,
+            col.names = c(&quot;Bachelor or graduate degree?&quot;, &quot;Twitter user&quot;, &quot;Observations&quot;, &quot;Proportion&quot;)) %&gt;% 
+  kable_classic(&quot;striped&quot;, full_width = FALSE)
+
+proportion_gss2</code></pre>
+<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+<caption>
+<span id="tab:unnamed-chunk-3">Table 3: </span>TABLE 1.3: Proportion of people using twitter with bachelor or graduate degrees
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Bachelor or graduate degree?
+</th>
+<th style="text-align:left;">
+Twitter user
+</th>
+<th style="text-align:right;">
+Observations
+</th>
+<th style="text-align:right;">
+Proportion
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Yes
+</td>
+<td style="text-align:left;">
+No
+</td>
+<td style="text-align:right;">
+375
+</td>
+<td style="text-align:right;">
+0.767
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Yes
+</td>
+<td style="text-align:left;">
+Yes
+</td>
+<td style="text-align:right;">
+114
+</td>
+<td style="text-align:right;">
+0.233
+</td>
+</tr>
+</tbody>
+</table>
+<ol style="list-style-type: decimal">
+<li>Using the CI formula for proportions, let us construct two 95% CIs for <code>bachelor_graduate</code> vs whether they use (Yes) and don’t (No) use twitter.</li>
+</ol>
+<pre class="r"><code>proportion_ci2 &lt;- Gss_mod2 %&gt;%
+  #Removes NA
+  filter(bachelor_graduate != &quot;NA&quot;,
+         twitter != &quot;NA&quot;) %&gt;% 
+  # Calculates n
+  group_by(bachelor_graduate, twitter) %&gt;%
+  count()  %&gt;% 
+  ungroup() %&gt;%
+  group_by(bachelor_graduate) %&gt;% 
+  mutate(proportion2 = n/sum(n)) %&gt;%
+  filter(bachelor_graduate != &quot;No&quot;) %&gt;%
+  # calculates proportion and elements in the CI formula
+  group_by(bachelor_graduate) %&gt;%  
+  summarise(twitter = twitter,
+            proportion2 = proportion2,
+            se_proportion2 = sqrt(proportion2 * (1 - proportion2) / n), 
+              margin_of_error2 = 1.96 * se_proportion2, 
+              rating_low2 = proportion2 - margin_of_error2, 
+              rating_high2 = proportion2 + margin_of_error2) %&gt;% 
+  #fixes aesthetics
+  kable(caption = &quot;TABLE 2.4: Proportion and confidence intervals of people using twitter based on education&quot;,
+             col.names = c(&quot;Bachelor or graduate degree?&quot;, &quot;Twitter user&quot;, &quot;Proportion&quot;, &quot;Standard error&quot;, &quot;Margin of error&quot;, &quot;Lower CI&quot;, &quot;Upper CI&quot;)) %&gt;% 
+  kable_classic(&quot;striped&quot;, full_width = FALSE)
+proportion_ci2</code></pre>
+<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+<caption>
+(#tab:bachelor_graduate_prop)TABLE 2.4: Proportion and confidence intervals of people using twitter based on education
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Bachelor or graduate degree?
+</th>
+<th style="text-align:left;">
+Twitter user
+</th>
+<th style="text-align:right;">
+Proportion
+</th>
+<th style="text-align:right;">
+Standard error
+</th>
+<th style="text-align:right;">
+Margin of error
+</th>
+<th style="text-align:right;">
+Lower CI
+</th>
+<th style="text-align:right;">
+Upper CI
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Yes
+</td>
+<td style="text-align:left;">
+No
+</td>
+<td style="text-align:right;">
+0.767
+</td>
+<td style="text-align:right;">
+0.022
+</td>
+<td style="text-align:right;">
+0.043
+</td>
+<td style="text-align:right;">
+0.724
+</td>
+<td style="text-align:right;">
+0.810
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Yes
+</td>
+<td style="text-align:left;">
+Yes
+</td>
+<td style="text-align:right;">
+0.233
+</td>
+<td style="text-align:right;">
+0.040
+</td>
+<td style="text-align:right;">
+0.078
+</td>
+<td style="text-align:right;">
+0.156
+</td>
+<td style="text-align:right;">
+0.311
+</td>
+</tr>
+</tbody>
+</table>
+<ol start="5" style="list-style-type: decimal">
+<li>Do these two Confidence Intervals overlap?</li>
+</ol>
+<p>They do not overlap and consequently we can conclude with 95% confidence that there is a significant difference in the population between people with bachelor’s or graduate degrees using twitter, being that a majority does not use twitter.</p>
+</div>
+<div id="email-usage" class="section level2">
+<h2>Email usage</h2>
+<p>Let us now try to estimate <em>population</em> parameter on time spent on email weekly. We do this through the following steps:</p>
+<ol style="list-style-type: decimal">
+<li>Create a new variable called <code>email</code> that combines <code>emailhr</code> and <code>emailmin</code> to reports the number of minutes the respondents spend on email weekly.</li>
+</ol>
+<pre class="r"><code>gss_email &lt;- gss
+
+# we change variables for emailhr and emailmin to numeric
+gss_email$emailhr &lt;- as.numeric(gss_email$emailhr)
+gss_email$emailmin &lt;- as.numeric(gss_email$emailmin)
+
+# We create a combined column for email with data in minutes
+gss_email &lt;- gss_email %&gt;%
+  mutate(email = emailhr * 60 + emailmin)</code></pre>
+<ol style="list-style-type: decimal">
+<li>Visualise the distribution of this new variable. Find the mean and the median number of minutes respondents spend on email weekly.</li>
+</ol>
+<pre class="r"><code>#Let us first quickly see the mean and median values
+gss_email %&gt;% 
+  #Find median and mean
+  summarize(mean_email = mean(email, na.rm = TRUE),
+            median_email = mean(email, na.rm = TRUE))</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##   mean_email median_email
+##        &lt;dbl&gt;        &lt;dbl&gt;
+## 1       417.         417.</code></pre>
+<pre class="r"><code># Let us plot it
+ggplot(gss_email, aes(x = email))+
+  #Density graph
+  geom_density()+
+  #Vertical lines showing mean and median
+  geom_vline(aes(xintercept = median(email, na.rm = TRUE)), color = &quot;Blue&quot;, size = 0.5)+
+  geom_vline(aes(xintercept = mean(email, na.rm = TRUE)), color = &quot;Red&quot;, size = 0.5)+
+  theme_bw()+
+  labs(title = &quot;Distribution of average minutes spent on emails \nper week&quot;,
+       subtitle = &quot;Blue line shows median; red line shows mean&quot;,
+       x = &quot;Minutes spent on email per week&quot;,
+       y = &quot;Proportion of observations&quot;)+
+  #We make sure to show the value on the mean and median on the x/axis
+  scale_x_continuous(breaks = c(median(gss_email$email, na.rm = TRUE), mean(gss_email$email, na.rm = TRUE), 1000, 2000, 3000, 4000, 5000))+
+  theme(axis.text = element_text(size = 7))</code></pre>
+<p><img src="/aboutme/aboutme_files/figure-html/email%20density%20graph-1.png" width="648" style="display: block; margin: auto;" />
+We see the distribution is very skewed to the left. There is several outliers, who are spending an extremely high amount of time on emails, which means that the average of the distribution is affected significantly. The median is therefore a better measure for what a “typical” American would spend on e-mail per week.</p>
+<ol style="list-style-type: decimal">
+<li>Using the <code>infer</code> package, calculate a 95% bootstrap confidence interval for the mean amount of time Americans spend on email weekly. Interpret this interval in context of the data, reporting its endpoints in “humanized” units (e.g. instead of 108 minutes, report 1 hr and 8 minutes). If you get a result that seems a bit odd, discuss why you think this might be the case.</li>
+</ol>
+<pre class="r"><code># sets seed for replicability - this means you will be able to do the same analysis I did
+set.seed(31)
+
+gss_email_boot &lt;- gss_email %&gt;% 
+  filter(email != &quot;NA&quot;) %&gt;% 
+  # specifies variable we are interested in
+  specify(response = email) %&gt;% 
+  # generates data using bootstrapping method
+  generate(reps = 1000, 
+           type = &quot;bootstrap&quot;) %&gt;% 
+  # calculates the mean
+  calculate(stat = &quot;mean&quot;)
+
+# calculates the confidence interval
+ci_email &lt;- gss_email_boot %&gt;% 
+  get_confidence_interval(level = 0.95, 
+                          type = &quot;percentile&quot;) %&gt;% 
+  # We change the variables to hrs and minutes by adding two new columns per CI
+mutate(lower_ci_hour = lower_ci %/% 60,
+       lower_ci_min = round(lower_ci %% 60, 0),
+       upper_ci_hour = upper_ci %/% 60,
+       upper_ci_min = round(upper_ci %% 60),0) %&gt;% 
+  # we then concatenate so we get the data in HH:MM format
+  unite(col = &quot;lower_ci_hhmm&quot;, lower_ci_hour, lower_ci_min, sep = &quot;:&quot;) %&gt;%
+  unite(col = &quot;upper_ci_hhmm&quot;, upper_ci_hour, upper_ci_min, sep = &quot;:&quot;) %&gt;% 
+  # We remove all but these two new columns 
+  select(lower_ci_hhmm, upper_ci_hhmm) %&gt;% 
+  # Table format
+  kable(caption = &quot;TABLE 2.5: Confidence interval for time spent on emails per week&quot;,
+             col.names = c(&quot;Lower CI&quot;, &quot;Upper CI&quot;)) %&gt;% 
+  kable_classic(&quot;striped&quot;, full_width = TRUE)
+
+
+ci_email</code></pre>
+<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; margin-left: auto; margin-right: auto;'>
+<caption>
+<span id="tab:unnamed-chunk-4">Table 4: </span>TABLE 2.5: Confidence interval for time spent on emails per week
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Lower CI
+</th>
+<th style="text-align:left;">
+Upper CI
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+6:25
+</td>
+<td style="text-align:left;">
+7:29
+</td>
+</tr>
+</tbody>
+</table>
+<p>This fits fairly well with the mean of 417 minutes (6:53), as it is in the interval</p>
+<ol style="list-style-type: decimal">
+<li>What would happen if we wanted a 99% confidence interval?</li>
+</ol>
+<p>Given we have the same number of observations, n, and we want to say with higher certainty where the true value lies within, it follows we must then expand the range. Imagine an extreme case where we want to say with 100% certainty where the true value lies. To do this we must technically include all possible values. As we then decrease our degree of certainty, it follows that our interval also decreases, and consequently a 99% confidence interval will be larger than a 95% confidence interval.</p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>This project showed how you can use both bootstrapping and formulas to calculate the confidence interval of the mean / proportions.</p>
+</div>
+</div>
