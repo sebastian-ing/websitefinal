@@ -94,25 +94,25 @@ disqusShortname = ""
     [[params.tiles.showcase]]
       title = "Croatian currency trade"
       subtitle = "Analyzing potential currency trade between the Crotian Kuna and the Euro"
-      image = "pic09.jpg"
+      image = "projects/currency.jpg"
       url = "projects/currency-trade"
 
     [[params.tiles.showcase]]
       title = "Nordic GDP composition"
       subtitle = "Analysis of the three Nordic economies"
-      image = "flags.jpg"
+      image = "projects/flags.jpg"
       url = "projects/nordic-gdp"
 
     [[params.tiles.showcase]]
       title = "Santander bike rentals"
       subtitle = "Analysis of COVID's effect on bike rentals in London"
-      image = "pic03.jpg"
+      image = "projects/bikes.jpg"
       url = "projects/covid-bike-analysis"
 
     [[params.tiles.showcase]]
       title = "Confidence intervals"
-      subtitle = "Methods for calculating confidence intervals in R using formulas and bootstrapping"
-      image = "pic04.jpg"
+      subtitle = "Methods for calculating confidence intervals in R using formulas and bootstrapping by looking at social media usage"
+      image = "projects/socialmedia.jpg"
       url = "projects/confidence-intervals"
 
    # [[params.tiles.showcase]]

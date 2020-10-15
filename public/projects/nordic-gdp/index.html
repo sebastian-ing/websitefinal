@@ -74,9 +74,11 @@
                                 <h1>Nordic GDP composition</h1>
                             </header>
                             
-                                <span class="image main"><img src="/img/projects/pic09.jpg" alt="" /></span>
+                                <span class="image main"><img src="/img/projects/flags.jpg" alt="" /></span>
                             
                             
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+<link href="/rmarkdown-libs/lightable/lightable.css" rel="stylesheet" />
 
 
 <div id="nordic-gdp-composition" class="section level1">
@@ -2094,8 +2096,147 @@ gdp_plot1 %&gt;%
        x = &quot;&quot;)+
   #make sure the x-axis breaks equal the one on the picture
   scale_x_continuous(breaks = seq(1970, 2019, by = 10))</code></pre>
-<p><img src="/projects/nordicgdp_files/figure-html/unnamed-chunk-1-1.png" width="960" style="display: block; margin: auto;" />
-So we see all components increasing over time - some more than others - but it is slightly hard to make out, so let us try and create a plot that shows the % components. Instead of showing imports and exports, let us instead show net exports (exports - imports). Now we have a problem with tidy data again, as we cannot subtract rows from each other. So we have to transform so that each indicator has its own value.</p>
+<p><img src="/projects/nordicgdp_files/figure-html/unnamed-chunk-1-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>So we see all components increasing over time - some more than others - but it is slightly hard to make out, so let us try and create a plot that shows the % components. To begin with let us calculate the GDP per country per year as we will need this to calculate the percentages. We want to do this because there is a difference between the GDP we calculate, and the GDP we were given in the original data set (as we will show below).</p>
+<pre class="r"><code>#First let us calculate the GDP given the inputs
+tidy_GDP_delta &lt;- tidy_GDP_nordics %&gt;% 
+  #We remove the given GDP
+  filter(IndicatorName != &quot;GDP (given)&quot;) %&gt;%
+  #We make imports value become negative (as it subtracts from GDP)
+  mutate(gdp_contribution = ifelse(IndicatorName == &quot;Imports&quot;,
+                                   -gdp_contribution,
+                                   gdp_contribution)) %&gt;% 
+  #Then we group by year and calculate the sum
+  group_by(year, Country) %&gt;% 
+  summarize(gdp_calc = sum(gdp_contribution)) 
+
+#Now we make a dataframe only consiting of the given GDP
+tidy_GDP_given &lt;- tidy_GDP_nordics %&gt;% 
+  filter(IndicatorName == &quot;GDP (given)&quot;)
+
+# we then join this with the original data frame
+
+left_join(tidy_GDP_delta, tidy_GDP_given, by = c(&quot;year&quot;, &quot;Country&quot;)) %&gt;% 
+  #And finally we calculate the absolute and relative differences
+  group_by(year, Country) %&gt;% 
+  summarize(absolute_diff = gdp_contribution-gdp_calc,
+            
+            percentage_diff = absolute_diff / gdp_contribution*100) %&gt;% 
+  #Let us find it by year
+  group_by(Country) %&gt;% 
+  summarize(absolute_diff = mean(absolute_diff),
+            percentage_diff = mean(percentage_diff)) %&gt;% 
+  kable(caption = &quot;TABLE 1.1: Average annual difference between calculated and given GDP (negative values show a higher calculated GDP)&quot;,
+             col.names = c(&quot;Country&quot;, &quot;Absolute difference (billion USD)&quot;, &quot;Percentage difference&quot;),
+        #Fixes number of decimal points     
+        digits = 1,
+        # Adds thousand decimals and does not include scientific notation     
+        format.args = list(scientific = FALSE)) %&gt;%  
+  kable_classic(&quot;striped&quot;, full_width = FALSE)</code></pre>
+<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+<caption>
+(#tab:gdp calculated)TABLE 1.1: Average annual difference between calculated and given GDP (negative values show a higher calculated GDP)
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Country
+</th>
+<th style="text-align:right;">
+Absolute difference (billion USD)
+</th>
+<th style="text-align:right;">
+Percentage difference
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Denmark
+</td>
+<td style="text-align:right;">
+2.0
+</td>
+<td style="text-align:right;">
+0.9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Norway
+</td>
+<td style="text-align:right;">
+3.0
+</td>
+<td style="text-align:right;">
+1.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sweden
+</td>
+<td style="text-align:right;">
+-6.3
+</td>
+<td style="text-align:right;">
+-2.3
+</td>
+</tr>
+</tbody>
+</table>
+<p>Instead of showing imports and exports, let us instead show net exports (exports - imports). Now we have a problem with tidy data again, as we cannot subtract rows from each other. So we have to transform so that each indicator has its own value, create a new column for net exports, and then retransform the data back as it looked before.</p>
+<pre class="r"><code>#Firstly let us find net exports. The logic works like this:
+
+gdp_plot2 &lt;- tidy_GDP_nordics %&gt;% 
+  #We first make it wide format so we can mutate a new column
+  pivot_wider(names_from = IndicatorName, values_from = gdp_contribution) %&gt;% 
+  #we find net exports by subtracting imports from exports
+  mutate(&quot;Net exports&quot; = (Exports - Imports)) %&gt;% 
+  #we transfer it back into longer format
+  pivot_longer(cols = c(4:10), 
+               names_to = &quot;IndicatorName&quot;, 
+               values_to = &quot;gdp_contribution&quot;) %&gt;% 
+  #finally we join with the df we created earlier that has the calculated gdp
+  left_join(tidy_GDP_delta, by = c(&quot;year&quot;, &quot;Country&quot;)) %&gt;% 
+  #Now we can calculate the % of gdp that each indicator has
+  mutate(gdp_percentage = gdp_contribution / gdp_calc) %&gt;% 
+  #finally let us filter for only what we need
+  filter(IndicatorName %in% c(&quot;Household expenditure&quot;, &quot;Government expenditure&quot;, &quot;Gross capital formation&quot;, &quot;Net exports&quot;))
+
+#let us now recreate the plot
+ggplot(gdp_plot2, aes(x = year,
+                      y = gdp_percentage,
+                      group = IndicatorName))+
+  geom_line()+
+  #create line
+  geom_line(aes(color = IndicatorName),
+            size = 1)+
+  # we use faceting so we can see it by countries
+  facet_wrap(~ Country)+
+  #aesthetics + titles
+  theme_bw()+
+  theme(legend.title = element_blank())+
+  labs(title = &quot;Development in components of GDP&quot;,
+       subtitle = &quot;&quot;,
+       y = &quot;Proportion&quot;,
+       x = &quot;&quot;,
+       caption = &quot;Source: United Nations&quot;)+
+  #make sure the x-axis breaks equal the one on the picture
+  scale_x_continuous(breaks = seq(1970, 2019, by = 10))+
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1))</code></pre>
+<p><img src="/projects/nordicgdp_files/figure-html/unnamed-chunk-2-1.png" width="960" style="display: block; margin: auto;" />
+Denmark and Sweden look quite similar in their development and levels, while Norway in particular exported a lot during the 80’s, 90’s and 00’s. Why might this be? Well we can look at the characteristics of each economy.</p>
+<ul>
+<li><p>Denmark is a fairly diversified open economy with large sectors in transport, health care and agriculture. These sectors are relatively do require some substantial investments.</p></li>
+<li><p>Sweden is a very industry-heavy economy producing a lot of durable goods. This requires a lot of investment as well. Sweden has been successful these past couple of years in exporting some of their companies abroad, e.g. Ikea and H&amp;M, which can have contributed to their increase in net exports.</p></li>
+<li><p>Norway is very oil-centric. Most large and mid-sized Norwegian companies are in some way related to the O&amp;G sector. This might be one of the reasons why we see a large increase in the net exports followed by a large decrease, as we have seen a continous decrease in the oil price after the financial crisis.</p></li>
+</ul>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>This project taught me the importance of data wrangling. It is a bit hard to understand what tidy data is, but once you are able to see it, it makes one’s life in R so much simpler, and allows you to execute commands, which would otherwise be much harder to do.</p>
+</div>
 </div>
 
                         </div>

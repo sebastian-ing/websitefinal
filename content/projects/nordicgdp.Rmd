@@ -4,7 +4,7 @@ categories:
 date: "2020-10-15T22:26:09-05:00"
 description: A look at the Nordic economies
 draft: false
-image: pic09.jpg
+image: flags.jpg
 keywords: ""
 slug: nordic-gdp
 title: Nordic GDP composition
