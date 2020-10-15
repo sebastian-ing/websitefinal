@@ -110,10 +110,10 @@ disqusShortname = ""
       url = "projects/covid-bike-analysis"
 
     [[params.tiles.showcase]]
-      title = "Ipsum"
-      subtitle = "Nisl Sed Aliquam"
+      title = "Confidence intervals"
+      subtitle = "Methods for calculating confidence intervals in R using formulas and bootstrapping"
       image = "pic04.jpg"
-      url = "blogs/ipsum"
+      url = "projects/confidence-interval"
 
    # [[params.tiles.showcase]]
     #  title = "Consequat"
@@ -168,24 +168,24 @@ disqusShortname = ""
     # Contact Section
     # You can add multiple emails, phone numbers, or addresses
     # by copying the corresponding map with frontmatter code.
-    [[params.contact.email]]
-    title = "Write me an email"
-    email = "Singemann.mfa2021@london.edu"
+   # [[params.contact.email]]
+   # title = "Write me an email"
+   # email = "Singemann.mfa2021@london.edu"
 
     #[[params.contact.phone]]
     #title = "Phone"
     #phone = "(000) 000-0000 x1234"
 
-    [[params.contact.address]]
-    title = "Address"
-    street = "London Business School"
-    city = "Regent's Park \n London NW1 4SA"
-    country = "United Kingdom"
+  #  [[params.contact.address]]
+   # title = "Address"
+    #street = "London Business School"
+    #city = "Regent's Park \n London NW1 4SA"
+    #country = "United Kingdom"
 
   # Footer section
   [params.footer]
     enable = true
- #   copyright = "Sebastian Ingemann"
+    copyright = "Sebastian Ingemann"
 
     # Uses font awesome icons
   #  [[params.footer.social]]

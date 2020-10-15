@@ -113,7 +113,7 @@ Next, let us look at the period 2015-2020. We would like to see how each month e
 
 To achieve this, we first calculate the two variables,expected value (let's call it `mean_bike`) and the actual value (`bike_hired`), then we create a plot with two lines based on the two variables using geom_line, and then we color the two areas using `geom_ribbon`.
 
-```{r monthly bike rental}
+```{r monthly bike rental, width = 20}
 # First we find the average for each month throughout the whole period
 bike_avg <- bike %>% 
   filter(year %in% c(2015:2019)) %>% 
