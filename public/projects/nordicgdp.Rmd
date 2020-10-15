@@ -27,12 +27,13 @@ knitr::opts_chunk$set(
 ```
 
 
-## Nordic GDP composition
+# Nordic GDP composition
 
-A
+In this project, we will look at the components of the different Nordic countries and then compare it to the rest of the world. There will be quite a lot of data wrangling, which is really good to know in R. Contrary to excel, it is quite hard to change individual rows in R, which instead primarily works in columns, i.e. it is quite easy to subtract one column from another, but a lot harder to subtract one row from another. Therefore we want to shape our R data so it is tidy data. What exactly is tidy data? Well it depends on what we want to achieve, but basically we want a column for every variable we are interested in. Data can be tidy for one use case but non-tidy for another.
 
+To analyze the Nordic GDP data, we will use the following packages.
 
-```{r load-libraries, echo=FALSE}
+```{r load-libraries}
 library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
 library(mosaic)
 library(ggthemes)
@@ -49,6 +50,7 @@ library(tidyquant)
 library(kableExtra)
 ```
 
+Our data comes from the [United Nations' National Accounts Main Aggregates Database](https://unstats.un.org/unsd/snaama/Downloads), which contains estimates of total GDP and its components for all countries from 1970 to today. We will look at how GDP and its components have changed over time, and compare different countries and how much each component contributes to that country's GDP. The file we will work with is [GDP and its breakdown at constant 2010 prices in US Dollars](http://unstats.un.org/unsd/amaapi/api/file/6). Let us start by loading the data and quickly skim it to see how it is how it is structured and organised.
 
 ```{r read_GDP_data}
 
@@ -58,7 +60,7 @@ UN_GDP_data  <-  read_excel(here::here("data", "Download-GDPconstant-USD-countri
 
 skim(UN_GDP_data)
 ```
-
+As  can be seen every year's value is a column. If we want to compare data between countries, this is not tidy, so instead we want one column with the country, one column with the year, and one column with the value. Let us also work in billions and change the name of the indicators we want to work with (recall that GDP = C + I + G -NX).
 
 
 ```{r reshape_GDP_data}
@@ -90,11 +92,48 @@ filter(IndicatorName %in% c("Gross capital formation","Household expenditure", "
     
 
 
-# Let us compare GDP components for these 3 countries
-country_list <- c("United States","India", "Germany")
+# Let us compare GDP components for the Nordics
+country_list <- c("Sweden","Denmark", "Norway")
 # we filter only for the countries in the list.
-tidy_GDP_USINDE <- tidy_GDP_data %>% 
+tidy_GDP_nordics <- tidy_GDP_data %>% 
   filter(Country %in% country_list)
 
-tidy_GDP_USINDE
 ```
+
+Let us now plot the data.
+
+```{r, fig.height = 7, fig.width = 10}
+
+
+# fix levels
+tidy_GDP_nordics$IndicatorName <- tidy_GDP_nordics$IndicatorName %>% 
+  factor(levels = c("Gross capital formation", "Exports", "Government expenditure", "Household expenditure", "Imports", "GDP (given)"))
+
+
+#Furthermore we remove the GDP given column for the plot below
+
+gdp_plot1 <- tidy_GDP_nordics %>% 
+  filter(IndicatorName != "GDP (given)")
+
+#let us create the plot
+gdp_plot1 %>% 
+  ggplot(aes(x = year,
+             y = gdp_contribution,
+             group = IndicatorName))+
+  #create line
+  geom_line(aes(color = IndicatorName),
+            size = 1)+
+  # we use faceting so we can see it by countries
+  facet_wrap(~ Country)+
+  #aesthetics + titles
+  theme_bw()+
+  theme(legend.title = element_blank())+
+  labs(title = "GDP components over time",
+       subtitle = "In constant 2010 USD",
+       y = "Billion US$",
+       x = "")+
+  #make sure the x-axis breaks equal the one on the picture
+  scale_x_continuous(breaks = seq(1970, 2019, by = 10))
+                     
+```
+So we see all components increasing over time - some more than others - but it is slightly hard to make out, so let us try and create a plot that shows the % components. Instead of showing imports and exports, let us instead show net exports (exports - imports). Now we have a problem with tidy data again, as we cannot subtract rows from each other. So we have to transform so that each indicator has its own value.
