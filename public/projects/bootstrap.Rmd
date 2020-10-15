@@ -7,8 +7,8 @@ description: Analyzing how you can use boostrapping in R using data from social 
 draft: false
 image: pic09.jpg
 keywords: ""
-slug: online-usage
-title: Confidence intervals using boostrapping
+slug: confidence-intervals
+title: Confidence intervals using boostrapping and formulas
 ---
 
 ```{r, setup, echo=FALSE}

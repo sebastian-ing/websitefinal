@@ -8,11 +8,11 @@
     <language>en-us</language>
     <lastBuildDate>Wed, 14 Oct 2020 22:26:09 -0500</lastBuildDate><atom:link href="/categories/social-media/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Confidence intervals using boostrapping</title>
-      <link>/projects/online-usage/</link>
+      <title>Confidence intervals using boostrapping and formulas</title>
+      <link>/projects/confidence-intervals/</link>
       <pubDate>Wed, 14 Oct 2020 22:26:09 -0500</pubDate>
       
-      <guid>/projects/online-usage/</guid>
+      <guid>/projects/confidence-intervals/</guid>
       <description>Bootstrap methodThe way I initially learned to do confidence intervals for populations was to use the formula. It is a (somewhat) complicated formula, where you would take a point estimate (often the mean), adding and subtracting some margin of error. The margin of error depends on the standard deviation (the higher the standard deviation, the higher the standard error), how confident we want to be in the interval (a 99% confidence interval will have a higher standard error than a 95%), and the number of observations (if we have a lot of data points, we can be more sure).</description>
     </item>
     
