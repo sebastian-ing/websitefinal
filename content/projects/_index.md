@@ -6,4 +6,4 @@ slug: projects
 title: Projects
 ---
 
-Data science projects I have finished.
+A collection of data science projects I have finished.
