@@ -5,7 +5,7 @@ categories:
 date: "2020-10-16T22:26:09-05:00"
 description: Evaluating a potential trading strategy for the Croatian currency
 draft: false
-image: pic09.jpg
+image: projects/currency.jpg
 keywords: ""
 slug: currency-trade
 title: Currency trade

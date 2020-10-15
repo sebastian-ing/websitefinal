@@ -5,7 +5,7 @@ categories:
 date: "2020-10-14T22:26:09-05:00"
 description: Analyzing how you can use boostrapping in R using data from social media survey
 draft: false
-image: pic09.jpg
+image: socialmedia.jpg
 keywords: ""
 slug: confidence-intervals
 title: Confidence intervals using boostrapping and formulas
