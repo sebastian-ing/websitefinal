@@ -113,7 +113,7 @@ disqusShortname = ""
       title = "Confidence intervals"
       subtitle = "Methods for calculating confidence intervals in R using formulas and bootstrapping"
       image = "pic04.jpg"
-      url = "projects/confidence-interval"
+      url = "projects/confidence-intervals"
 
    # [[params.tiles.showcase]]
     #  title = "Consequat"
