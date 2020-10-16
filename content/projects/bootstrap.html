@@ -78,14 +78,14 @@ proportion_gss &lt;- Gss_mod %&gt;%
   ungroup() %&gt;% 
   mutate(proportion = n/sum(n)) %&gt;% 
   # Fixes table
-kable(caption = &quot;TABLE 1.1: Proportion of people using snapchat or instagram&quot;,
+kable(caption = &quot;Proportion of people using snapchat or instagram&quot;,
              col.names = c(&quot;Uses snapchat or instagram?&quot;, &quot;Observations&quot;, &quot;Proportion&quot;)) %&gt;% 
-  kable_classic(&quot;striped&quot;, full_width = FALSE)
+  kable_material_dark(&quot;striped&quot;, full_width = FALSE)
 
 proportion_gss</code></pre>
-<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+<table class=" lightable-material-dark lightable-striped" style='font-family: "Source Sans Pro", helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
 <caption>
-<span id="tab:unnamed-chunk-1">Table 1: </span>TABLE 1.1: Proportion of people using snapchat or instagram
+<span id="tab:unnamed-chunk-3">Table 1: </span>Proportion of people using snapchat or instagram
 </caption>
 <thead>
 <tr>
@@ -144,14 +144,14 @@ proportion_ci &lt;- Gss_mod %&gt;%
               CI_low = proportion - margin_of_error, 
               CI_high = proportion + margin_of_error
             ) %&gt;% 
-  kable(caption = &quot;TABLE 1.2: Proportion of people using snapchat or instagram based on gender&quot;,
+  kable(caption = &quot;Proportion of people using snapchat or instagram based on gender&quot;,
              col.names = c(&quot;Gender&quot;, &quot;Proportion of yes&quot;, &quot;Standard error&quot;, &quot;margin of error&quot;, &quot;Lower CI&quot;, &quot;Upper CI&quot;)) %&gt;% 
-  kable_classic(&quot;striped&quot;, full_width = FALSE)
+  kable_material_dark(&quot;striped&quot;, full_width = FALSE)
 
 proportion_ci</code></pre>
-<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+<table class=" lightable-material-dark lightable-striped" style='font-family: "Source Sans Pro", helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
 <caption>
-<span id="tab:instasnap">Table 2: </span>TABLE 1.2: Proportion of people using snapchat or instagram based on gender
+<span id="tab:unnamed-chunk-4">Table 2: </span>Proportion of people using snapchat or instagram based on gender
 </caption>
 <thead>
 <tr>
@@ -261,14 +261,14 @@ Gss_mod2$degree &lt;- as.factor(Gss_mod2$degree) %&gt;%
   #We will only look at bachelor and graduates
   filter(bachelor_graduate != &quot;No&quot;) %&gt;%
   #fixes aesthetics
-  kable(caption = &quot;TABLE 1.3: Proportion of people using twitter with bachelor or graduate degrees&quot;,
+  kable(caption = &quot;Proportion of people using twitter with bachelor or graduate degrees&quot;,
             col.names = c(&quot;Bachelor or graduate degree?&quot;, &quot;Twitter user&quot;, &quot;Observations&quot;, &quot;Proportion&quot;)) %&gt;% 
-  kable_classic(&quot;striped&quot;, full_width = FALSE)
+  kable_material_dark(&quot;striped&quot;, full_width = FALSE)
 
 proportion_gss2</code></pre>
-<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+<table class=" lightable-material-dark lightable-striped" style='font-family: "Source Sans Pro", helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
 <caption>
-<span id="tab:unnamed-chunk-3">Table 3: </span>TABLE 1.3: Proportion of people using twitter with bachelor or graduate degrees
+<span id="tab:unnamed-chunk-7">Table 3: </span>Proportion of people using twitter with bachelor or graduate degrees
 </caption>
 <thead>
 <tr>
@@ -340,13 +340,13 @@ Yes
               rating_low2 = proportion2 - margin_of_error2, 
               rating_high2 = proportion2 + margin_of_error2) %&gt;% 
   #fixes aesthetics
-  kable(caption = &quot;TABLE 2.4: Proportion and confidence intervals of people using twitter based on education&quot;,
+  kable(caption = &quot;Proportion and confidence intervals of people using twitter based on education&quot;,
              col.names = c(&quot;Bachelor or graduate degree?&quot;, &quot;Twitter user&quot;, &quot;Proportion&quot;, &quot;Standard error&quot;, &quot;Margin of error&quot;, &quot;Lower CI&quot;, &quot;Upper CI&quot;)) %&gt;% 
-  kable_classic(&quot;striped&quot;, full_width = FALSE)
+  kable_material_dark(&quot;striped&quot;, full_width = FALSE)
 proportion_ci2</code></pre>
-<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+<table class=" lightable-material-dark lightable-striped" style='font-family: "Source Sans Pro", helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
 <caption>
-(#tab:bachelor_graduate_prop)TABLE 2.4: Proportion and confidence intervals of people using twitter based on education
+(#tab:bachelor_graduate_prop)Proportion and confidence intervals of people using twitter based on education
 </caption>
 <thead>
 <tr>
@@ -502,15 +502,15 @@ mutate(lower_ci_hour = lower_ci %/% 60,
   # We remove all but these two new columns 
   select(lower_ci_hhmm, upper_ci_hhmm) %&gt;% 
   # Table format
-  kable(caption = &quot;TABLE 2.5: Confidence interval for time spent on emails per week&quot;,
+  kable(caption = &quot;Confidence interval for time spent on emails per week&quot;,
              col.names = c(&quot;Lower CI&quot;, &quot;Upper CI&quot;)) %&gt;% 
-  kable_classic(&quot;striped&quot;, full_width = TRUE)
+  kable_material_dark(&quot;striped&quot;, full_width = TRUE)
 
 
 ci_email</code></pre>
-<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; margin-left: auto; margin-right: auto;'>
+<table class=" lightable-material-dark lightable-striped" style='font-family: "Source Sans Pro", helvetica, sans-serif; margin-left: auto; margin-right: auto;'>
 <caption>
-<span id="tab:unnamed-chunk-4">Table 4: </span>TABLE 2.5: Confidence interval for time spent on emails per week
+<span id="tab:unnamed-chunk-8">Table 4: </span>Confidence interval for time spent on emails per week
 </caption>
 <thead>
 <tr>

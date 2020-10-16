@@ -41,7 +41,7 @@ The Croatian economy is very dependent on tourism. In fact around 20% of the GDP
 
 We want to try out two strategies: The theoretical optimal strategy and the implementable strategy. The optimal strategy will give you the return if you were able to time the market perfectly every year, while the implementable strategy is a strategy which is fairly easy to implement (but will give you lower returns). To simulate both strategies we will use R, and I will guide you as we go along on why we are doing the different things. To begin with you can see below which packages I will be using:
 
-```{r load-libraries}
+```{r}
 library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
 library(mosaic)
 library(ggthemes)
@@ -56,7 +56,7 @@ library(lubridate)
 ```
 
 First let us read the data. Here I have downloaded [Croatian currency data from the last 15 years from the Croatian central bank](https://www.hnb.hr/en/core-functions/monetary-policy/exchange-rate-list/exchange-rate-list). We will be looking at the exchange rate with the EUR. Let us first load the data.
-```{r read_exchange data}
+```{r}
 
 HRK_data  <-  read_xlsx(here::here("data", "DailyExchangeRates_01101999-12102020.xlsx"), # Loads data with excel filename
               
@@ -68,7 +68,7 @@ skim(HRK_data) #it is always a good idea to skim the data to get an idea of what
 
 We will only be working with two of the variables: `Date` and `Middle Rate`. To implement the optimal strategy, what we want to do is to look at a "tourist year" instead of a normal year. The idea is that we want to buy HKR at the lowest point during the off-season, when the currency should be at its lowest, and sell it during the tourist season, when the currency has appreciated again. To do this we define a new column `t_year` which matches the tourist season. Our off-season will run from November 1 of every year to April 30 the next year, while the tourist season runs from 1 May to 31 October. So the tourist year of 2010 will begin on 1 November 2009 and finish on October 31 2010. Let us clean up the data a bit and then add this.
 
-```{r, format data}
+```{r}
 
 HRK_data_mod <- HRK_data %>% 
   #Fixes date format and changes exchange from HRK/EUR to EUR/HRK
@@ -108,7 +108,7 @@ HRK_data_mod <- HRK_data %>%
 
 Next we will find the optimal trading days for each year. We do this by finding the maximum exchange rate for the the "tourist season" part of the year, and the lowest exchange rate for the "off-season" part of the year.
 
-```{r, optimal trading strategy}
+```{r}
 HRK_data_optimal <- HRK_data_mod %>% 
   #Now we calculate the maximum currency value in the tourist season and the lowest in the off-season. These are our optimal buying / selling rates         
   group_by(t_year, season) %>% 
@@ -134,7 +134,7 @@ HRK_data_optimal <- HRK_data_mod %>%
 # Let us display it in a nice table
     
 HRK_data_optimal %>% 
-  kable(caption = "TABLE 1.1: Annual returns from optimal trading strategy for HKR/EUR",
+  kable(caption = "Annual returns from optimal trading strategy for HKR/EUR",
              col.names = c("Tourism year", "Date of purchase", "Purchase price", "Date of sale",  "Sale price", "Absolute return", "Return (%)", "Days of position"),
         digits = 4) %>% 
   kable_material_dark("striped", full_width = FALSE) 
@@ -143,7 +143,7 @@ HRK_data_optimal %>%
 
 This looks very nice. The returns are not going to make you a millionaire over night, but they do provide a consistent positive return every year. While we are at it let us just visualize the data and find the mean.
 
-```{r optimal-plot}
+```{r}
 # Plots the data. We reorder so it shows returns in descending orders
 ggplot(HRK_data_optimal, aes(x = reorder(t_year, -return),
                              y = return))+
@@ -196,7 +196,7 @@ HRK_optimal_summary <- HRK_data_optimal %>%
 
 #Let us make the table look nice
 HRK_optimal_summary %>% 
-  kable(caption = "TABLE 1.2: Annual returns from optimal trading strategy for HKR/EUR",
+  kable(caption = "Annual returns from optimal trading strategy for HKR/EUR",
              col.names = c("Mean position length", "Mean return (%)", "Standard deviation (%)", "Observations",  "Standard error (%)", "T critical", "Margin of error (%)", "Lower CI (%)", "Upper CI (%)"),
         digits = 4) %>% 
   kable_material_dark("striped", full_width = FALSE) 
@@ -207,10 +207,10 @@ So with 95% confidence we can say the returns are significant (do note our obser
 
 ## Implementable strategy
 
-We just found the optimal strategy, but let us now try to do the same for the implementable strategy. What we can see in the first table we made (table 1.1) is that most purchase dates cluster around January and February, while most sales dates cluster around July and August. Let us therefore use the optimal trading dates we just found to find an entry and exit date for the position for every year. One way to do this would be to find the median date in the dataset.
+We just found the optimal strategy, but let us now try to do the same for the implementable strategy. What we can see in the first table we made (table 1) is that most purchase dates cluster around January and February, while most sales dates cluster around July and August. Let us therefore use the optimal trading dates we just found to find an entry and exit date for the position for every year. One way to do this would be to find the median date in the dataset.
 
 
-```{r optimal dates}
+```{r}
 
 HRK_optimal_dates <- HRK_data_optimal %>% 
   # We want to convert the months and days for each optimal date into numbers (we do not care about the year). There is no mmdd format for lubridate, so instead we find the number of days in the year
@@ -233,14 +233,14 @@ HRK_optimal_dates <- HRK_data_optimal %>%
    # we only show the two dates
  select(c(purchase_date, sale_date)) %>% 
    #Makes a nice table
-kable(caption = "TABLE 2.1: Optimal dates for executing trade",
+kable(caption = "Optimal dates for executing trade",
              col.names = c("Optimal purchase date", "Optimal sale date")) %>% 
-  kable_classic("striped", full_width = FALSE) 
+  kable_material_dark("striped", full_width = FALSE) 
 ```
 
 We've now found the optimal dates for executing the trade every year. Let us see what the returns will be.
 
-```{r implementable strategy}
+```{r}
 HRK_fixed_dates <- HRK_data_mod %>%
   #We filter so we only show the purchase and sale day for each year
   filter(month == HRK_optimal_dates$optimal_purchase_month & 
@@ -321,10 +321,10 @@ HRK_fixed_summary <- HRK_fixed_dates %>%
             UpperCI = mean_return + MoE) %>% 
   # let us only show the mean and the confidence interval
   select(c(mean_return, LowerCI, UpperCI)) %>% 
-  kable(caption = "TABLE 2.2: Confidence interval for implementable trade",
+  kable(caption = "Confidence interval for implementable trade",
              col.names = c("Mean return (%)", "Lower CI (%)", "Upper CI (%)"),
         digits = 2) %>% 
-  kable_classic("striped", full_width = FALSE) 
+  kable_material_dark("striped", full_width = FALSE) 
 
 HRK_fixed_summary
 ```

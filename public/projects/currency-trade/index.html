@@ -112,7 +112,7 @@ skim(HRK_data) #it is always a good idea to skim the data to get an idea of what
 <table style='width: auto;'
         class='table table-condensed'>
 <caption>
-(#tab:read_exchange data)Data summary
+<span id="tab:unnamed-chunk-2">Table 1: </span>Data summary
 </caption>
 <thead>
 <tr>
@@ -618,13 +618,13 @@ Selling rate
 # Let us display it in a nice table
     
 HRK_data_optimal %&gt;% 
-  kable(caption = &quot;TABLE 1.1: Annual returns from optimal trading strategy for HKR/EUR&quot;,
+  kable(caption = &quot;Annual returns from optimal trading strategy for HKR/EUR&quot;,
              col.names = c(&quot;Tourism year&quot;, &quot;Date of purchase&quot;, &quot;Purchase price&quot;, &quot;Date of sale&quot;,  &quot;Sale price&quot;, &quot;Absolute return&quot;, &quot;Return (%)&quot;, &quot;Days of position&quot;),
         digits = 4) %&gt;% 
   kable_material_dark(&quot;striped&quot;, full_width = FALSE) </code></pre>
 <table class=" lightable-material-dark lightable-striped" style='font-family: "Source Sans Pro", helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
 <caption>
-(#tab:optimal trading strategy)TABLE 1.1: Annual returns from optimal trading strategy for HKR/EUR
+<span id="tab:unnamed-chunk-4">Table 2: </span>Annual returns from optimal trading strategy for HKR/EUR
 </caption>
 <thead>
 <tr>
@@ -1078,7 +1078,7 @@ ggplot(HRK_data_optimal, aes(x = reorder(t_year, -return),
   # Graphical tweakes - the scale_y_continous makes sure the columns are not floating on the x-axis.
   scale_y_continuous(expand = expansion(mult = c(0, .1)))+
   theme(axis.text = element_text(size = 8))</code></pre>
-<p><img src="/projects/Currencytrade_files/figure-html/optimal-plot-1.png" width="648" style="display: block; margin: auto;" />
+<p><img src="/projects/Currencytrade_files/figure-html/unnamed-chunk-5-1.png" width="648" style="display: block; margin: auto;" />
 Again 2.5% is not a lot for a mean return, but with currencies you can normally use a lot of leverage to increase your returns.</p>
 <p>One question we could ask ourselves is whether this return provides significant positive returns. To do this let us create a confidence interval for the return. If 0 is part of it, we cannot say for sure the return is significant.</p>
 <pre class="r"><code>HRK_optimal_summary &lt;- HRK_data_optimal %&gt;% 
@@ -1095,13 +1095,13 @@ Again 2.5% is not a lot for a mean return, but with currencies you can normally 
 
 #Let us make the table look nice
 HRK_optimal_summary %&gt;% 
-  kable(caption = &quot;TABLE 1.2: Annual returns from optimal trading strategy for HKR/EUR&quot;,
+  kable(caption = &quot;Annual returns from optimal trading strategy for HKR/EUR&quot;,
              col.names = c(&quot;Mean position length&quot;, &quot;Mean return (%)&quot;, &quot;Standard deviation (%)&quot;, &quot;Observations&quot;,  &quot;Standard error (%)&quot;, &quot;T critical&quot;, &quot;Margin of error (%)&quot;, &quot;Lower CI (%)&quot;, &quot;Upper CI (%)&quot;),
         digits = 4) %&gt;% 
   kable_material_dark(&quot;striped&quot;, full_width = FALSE) </code></pre>
 <table class=" lightable-material-dark lightable-striped" style='font-family: "Source Sans Pro", helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
 <caption>
-<span id="tab:unnamed-chunk-1">Table 1: </span>TABLE 1.2: Annual returns from optimal trading strategy for HKR/EUR
+<span id="tab:unnamed-chunk-6">Table 3: </span>Annual returns from optimal trading strategy for HKR/EUR
 </caption>
 <thead>
 <tr>
@@ -1170,7 +1170,7 @@ Upper CI (%)
 </div>
 <div id="implementable-strategy" class="section level2">
 <h2>Implementable strategy</h2>
-<p>We just found the optimal strategy, but let us now try to do the same for the implementable strategy. What we can see in the first table we made (table 1.1) is that most purchase dates cluster around January and February, while most sales dates cluster around July and August. Let us therefore use the optimal trading dates we just found to find an entry and exit date for the position for every year. One way to do this would be to find the median date in the dataset.</p>
+<p>We just found the optimal strategy, but let us now try to do the same for the implementable strategy. What we can see in the first table we made (table 1) is that most purchase dates cluster around January and February, while most sales dates cluster around July and August. Let us therefore use the optimal trading dates we just found to find an entry and exit date for the position for every year. One way to do this would be to find the median date in the dataset.</p>
 <pre class="r"><code>HRK_optimal_dates &lt;- HRK_data_optimal %&gt;% 
   # We want to convert the months and days for each optimal date into numbers (we do not care about the year). There is no mmdd format for lubridate, so instead we find the number of days in the year
   mutate(monthday_purchase = month(date_purchase) * 30 + day(date_purchase),
@@ -1192,12 +1192,12 @@ Upper CI (%)
    # we only show the two dates
  select(c(purchase_date, sale_date)) %&gt;% 
    #Makes a nice table
-kable(caption = &quot;TABLE 2.1: Optimal dates for executing trade&quot;,
+kable(caption = &quot;Optimal dates for executing trade&quot;,
              col.names = c(&quot;Optimal purchase date&quot;, &quot;Optimal sale date&quot;)) %&gt;% 
-  kable_classic(&quot;striped&quot;, full_width = FALSE) </code></pre>
-<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+  kable_material_dark(&quot;striped&quot;, full_width = FALSE) </code></pre>
+<table class=" lightable-material-dark lightable-striped" style='font-family: "Source Sans Pro", helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
 <caption>
-(#tab:optimal dates)TABLE 2.1: Optimal dates for executing trade
+<span id="tab:unnamed-chunk-7">Table 4: </span>Optimal dates for executing trade
 </caption>
 <thead>
 <tr>
@@ -1284,7 +1284,7 @@ HRK_fixed_dates %&gt;%
   scale_x_continuous(limits = c(2004,2020), 
                      breaks = seq(2005,2019,  by = 1))+
   theme(axis.text = element_text(size = 8))</code></pre>
-<p><img src="/projects/Currencytrade_files/figure-html/implementable%20strategy-1.png" width="648" style="display: block; margin: auto;" />
+<p><img src="/projects/Currencytrade_files/figure-html/unnamed-chunk-8-1.png" width="648" style="display: block; margin: auto;" />
 So the strategy seems to work consistently, albeit the returns are slightly low. Let us check how a confidence interval would look for this data.</p>
 <pre class="r"><code>HRK_fixed_summary &lt;- HRK_fixed_dates %&gt;% 
   #we calculate what we need for a confidence interval
@@ -1299,15 +1299,15 @@ So the strategy seems to work consistently, albeit the returns are slightly low.
             UpperCI = mean_return + MoE) %&gt;% 
   # let us only show the mean and the confidence interval
   select(c(mean_return, LowerCI, UpperCI)) %&gt;% 
-  kable(caption = &quot;TABLE 2.2: Confidence interval for implementable trade&quot;,
+  kable(caption = &quot;Confidence interval for implementable trade&quot;,
              col.names = c(&quot;Mean return (%)&quot;, &quot;Lower CI (%)&quot;, &quot;Upper CI (%)&quot;),
         digits = 2) %&gt;% 
-  kable_classic(&quot;striped&quot;, full_width = FALSE) 
+  kable_material_dark(&quot;striped&quot;, full_width = FALSE) 
 
 HRK_fixed_summary</code></pre>
-<table class=" lightable-classic lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
+<table class=" lightable-material-dark lightable-striped" style='font-family: "Source Sans Pro", helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'>
 <caption>
-<span id="tab:unnamed-chunk-2">Table 2: </span>TABLE 2.2: Confidence interval for implementable trade
+<span id="tab:unnamed-chunk-9">Table 5: </span>Confidence interval for implementable trade
 </caption>
 <thead>
 <tr>

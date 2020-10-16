@@ -36,7 +36,7 @@ However, another way to find a confidence interval is using the bootstrap method
 I will show how both the formula and the boostrapping method can be used to construct intervals. To help us we will use the [General Social Survey (GSS)](http://www.gss.norc.org/), which gathers data on American society in order to monitor and explain trends in attitudes, behaviours, and attributes. Many trends have been tracked for decades, so one can see the evolution of attitudes, etc in American Society.
 We will use the following packages (infer being particularly important as this allows us to do boostrapping):
 
-```{r load-libraries}
+```{r }
 library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
 library(mosaic)
 library(ggthemes)
@@ -85,7 +85,7 @@ We will do this by:
 
 1. Creating a  new variable, `snap_insta` that is *Yes* if the respondent reported using any of Snapchat (`snapchat`) **OR** Instagram (`instagrm`), and *No* if not. If the recorded value was NA for both of these questions, the value in the new variable should also be NA.
 
-```{r snapinstanewcolumn}
+```{r}
 # First we add a new column called snap_insta where if either snap or insta is true, we put "Yes", if both are no we put "No", and otherwise "NA"
 Gss_mod <- gss %>%
   mutate(snap_insta = case_when(
@@ -108,9 +108,9 @@ proportion_gss <- Gss_mod %>%
   ungroup() %>% 
   mutate(proportion = n/sum(n)) %>% 
   # Fixes table
-kable(caption = "TABLE 1.1: Proportion of people using snapchat or instagram",
+kable(caption = "Proportion of people using snapchat or instagram",
              col.names = c("Uses snapchat or instagram?", "Observations", "Proportion")) %>% 
-  kable_classic("striped", full_width = FALSE)
+  kable_material_dark("striped", full_width = FALSE)
 
 proportion_gss
 ```
@@ -118,7 +118,7 @@ proportion_gss
 
 1. Using the CI formula for proportions, we will construct 95% CIs for men and women who used either Snapchat or Instagram
 
-```{r instasnap}
+```{r}
 
 # Now we do the same as above but for women and men
 proportion_ci <- Gss_mod %>%
@@ -136,9 +136,9 @@ proportion_ci <- Gss_mod %>%
               CI_low = proportion - margin_of_error, 
               CI_high = proportion + margin_of_error
             ) %>% 
-  kable(caption = "TABLE 1.2: Proportion of people using snapchat or instagram based on gender",
+  kable(caption = "Proportion of people using snapchat or instagram based on gender",
              col.names = c("Gender", "Proportion of yes", "Standard error", "margin of error", "Lower CI", "Upper CI")) %>% 
-  kable_classic("striped", full_width = FALSE)
+  kable_material_dark("striped", full_width = FALSE)
 
 proportion_ci
 
@@ -171,7 +171,7 @@ Gss_mod2$degree <- as.factor(Gss_mod2$degree) %>%
 
 1. Create a  new variable, `bachelor_graduate` that is *Yes* if the respondent has either a `Bachelor` or `Graduate` degree. As before, if the recorded value for either was NA, the value in your new variable should also be NA.
 
-```{r bachelor_graduate}
+```{r}
 Gss_mod2 <- Gss_mod2 %>%
   mutate(bachelor_graduate = case_when(
     # Case when column should return yes
@@ -201,9 +201,9 @@ proportion_gss2 <- Gss_mod2 %>%
   #We will only look at bachelor and graduates
   filter(bachelor_graduate != "No") %>%
   #fixes aesthetics
-  kable(caption = "TABLE 1.3: Proportion of people using twitter with bachelor or graduate degrees",
+  kable(caption = "Proportion of people using twitter with bachelor or graduate degrees",
             col.names = c("Bachelor or graduate degree?", "Twitter user", "Observations", "Proportion")) %>% 
-  kable_classic("striped", full_width = FALSE)
+  kable_material_dark("striped", full_width = FALSE)
 
 proportion_gss2
 
@@ -234,9 +234,9 @@ proportion_ci2 <- Gss_mod2 %>%
               rating_low2 = proportion2 - margin_of_error2, 
               rating_high2 = proportion2 + margin_of_error2) %>% 
   #fixes aesthetics
-  kable(caption = "TABLE 2.4: Proportion and confidence intervals of people using twitter based on education",
+  kable(caption = "Proportion and confidence intervals of people using twitter based on education",
              col.names = c("Bachelor or graduate degree?", "Twitter user", "Proportion", "Standard error", "Margin of error", "Lower CI", "Upper CI")) %>% 
-  kable_classic("striped", full_width = FALSE)
+  kable_material_dark("striped", full_width = FALSE)
 proportion_ci2
 ```
 
@@ -327,9 +327,9 @@ mutate(lower_ci_hour = lower_ci %/% 60,
   # We remove all but these two new columns 
   select(lower_ci_hhmm, upper_ci_hhmm) %>% 
   # Table format
-  kable(caption = "TABLE 2.5: Confidence interval for time spent on emails per week",
+  kable(caption = "Confidence interval for time spent on emails per week",
              col.names = c("Lower CI", "Upper CI")) %>% 
-  kable_classic("striped", full_width = TRUE)
+  kable_material_dark("striped", full_width = TRUE)
 
 
 ci_email
