@@ -1,7 +1,7 @@
 ---
 categories:
 - "Finance"
-date: "2020-10-16T22:26:09-05:00"
+date: "2020-10-17T22:26:09-05:00"
 description: Evaluating a potential trading strategy for the Croatian currency
 draft: false
 image: projects/currency.jpg
@@ -134,10 +134,10 @@ HRK_data_optimal <- HRK_data_mod %>%
 # Let us display it in a nice table
     
 HRK_data_optimal %>% 
-  kable(caption = "TABLE xx: Annual returns from optimal trading strategy for HKR/EUR",
+  kable(caption = "TABLE 1.1: Annual returns from optimal trading strategy for HKR/EUR",
              col.names = c("Tourism year", "Date of purchase", "Purchase price", "Date of sale",  "Sale price", "Absolute return", "Return (%)", "Days of position"),
         digits = 4) %>% 
-  kable_classic("striped", full_width = FALSE) 
+  kable_material_dark("striped", full_width = FALSE) 
 
 ```
 
@@ -199,7 +199,7 @@ HRK_optimal_summary %>%
   kable(caption = "TABLE 1.2: Annual returns from optimal trading strategy for HKR/EUR",
              col.names = c("Mean position length", "Mean return (%)", "Standard deviation (%)", "Observations",  "Standard error (%)", "T critical", "Margin of error (%)", "Lower CI (%)", "Upper CI (%)"),
         digits = 4) %>% 
-  kable_classic("striped", full_width = FALSE) 
+  kable_material_dark("striped", full_width = FALSE) 
 
 
 ```

@@ -10,7 +10,7 @@
     <item>
       <title>Currency trade</title>
       <link>/projects/currency-trade/</link>
-      <pubDate>Fri, 16 Oct 2020 22:26:09 -0500</pubDate>
+      <pubDate>Sat, 17 Oct 2020 22:26:09 -0500</pubDate>
       
       <guid>/projects/currency-trade/</guid>
       <description>Using R to study a potential currency tradeThe inspiration for this post actually comes from a trading strategy project I was doing in my investment fundamental course. I would normally have used excel for this type of analysis, but I decided to try R and I found it to be much more powerful at analyzing the trading strategy than excel would have been. Before we start the analysis, let us look at the background of the trading strategy.</description>
@@ -19,29 +19,29 @@
     <item>
       <title>Nordic GDP composition</title>
       <link>/projects/nordic-gdp/</link>
-      <pubDate>Thu, 15 Oct 2020 22:26:09 -0500</pubDate>
+      <pubDate>Fri, 16 Oct 2020 22:26:09 -0500</pubDate>
       
       <guid>/projects/nordic-gdp/</guid>
       <description>Nordic GDP compositionIn this project, we will look at the components of the different Nordic countries and then compare it to the rest of the world. There will be quite a lot of data wrangling, which is really good to know in R. Contrary to excel, it is quite hard to change individual rows in R, which instead primarily works in columns, i.e. it is quite easy to subtract one column from another, but a lot harder to subtract one row from another.</description>
     </item>
     
     <item>
-      <title>Confidence intervals using boostrapping and formulas</title>
-      <link>/projects/confidence-intervals/</link>
-      <pubDate>Wed, 14 Oct 2020 22:26:09 -0500</pubDate>
-      
-      <guid>/projects/confidence-intervals/</guid>
-      <description>Bootstrap methodThe way I initially learned to do confidence intervals for populations was to use the formula. It is a (somewhat) complicated formula, where you would take a point estimate (often the mean), adding and subtracting some margin of error. The margin of error depends on the standard deviation (the higher the standard deviation, the higher the standard error), how confident we want to be in the interval (a 99% confidence interval will have a higher standard error than a 95%), and the number of observations (if we have a lot of data points, we can be more sure).</description>
-    </item>
-    
-    <item>
       <title>COVID and Santander bikes</title>
       <link>/projects/covid-bike-analysis/</link>
-      <pubDate>Tue, 13 Oct 2020 22:26:09 -0500</pubDate>
+      <pubDate>Wed, 14 Oct 2020 22:26:09 -0500</pubDate>
       
       <guid>/projects/covid-bike-analysis/</guid>
       <description>COVID and its effect on bike rentalsA very common (and pleasant) sight in London are its Santander bikes which can be rented fairly cheap and be ridden all around the city. This data science project will analyze how the development in bike rentals have progressed over the past couple of years and in particular how COVID affected the number of rentals during the lockdown.
 To help us with the analysis, let us first load the following packages.</description>
+    </item>
+    
+    <item>
+      <title>Confidence intervals using boostrapping and formulas</title>
+      <link>/projects/confidence-intervals/</link>
+      <pubDate>Tue, 13 Oct 2020 22:26:09 -0500</pubDate>
+      
+      <guid>/projects/confidence-intervals/</guid>
+      <description>Bootstrap methodThe way I initially learned to do confidence intervals for populations was to use the formula. It is a (somewhat) complicated formula, where you would take a point estimate (often the mean), adding and subtracting some margin of error. The margin of error depends on the standard deviation (the higher the standard deviation, the higher the standard error), how confident we want to be in the interval (a 99% confidence interval will have a higher standard error than a 95%), and the number of observations (if we have a lot of data points, we can be more sure).</description>
     </item>
     
   </channel>

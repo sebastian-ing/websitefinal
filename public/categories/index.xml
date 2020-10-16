@@ -6,11 +6,11 @@
     <description>Recent content in Categories on Forty</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 16 Oct 2020 22:26:09 -0500</lastBuildDate><atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 17 Oct 2020 22:26:09 -0500</lastBuildDate><atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Finance</title>
       <link>/categories/finance/</link>
-      <pubDate>Fri, 16 Oct 2020 22:26:09 -0500</pubDate>
+      <pubDate>Sat, 17 Oct 2020 22:26:09 -0500</pubDate>
       
       <guid>/categories/finance/</guid>
       <description></description>
@@ -19,27 +19,27 @@
     <item>
       <title>Economic analysis</title>
       <link>/categories/economic-analysis/</link>
-      <pubDate>Thu, 15 Oct 2020 22:26:09 -0500</pubDate>
+      <pubDate>Fri, 16 Oct 2020 22:26:09 -0500</pubDate>
       
       <guid>/categories/economic-analysis/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Social media</title>
-      <link>/categories/social-media/</link>
+      <title>Covid</title>
+      <link>/categories/covid/</link>
       <pubDate>Wed, 14 Oct 2020 22:26:09 -0500</pubDate>
       
-      <guid>/categories/social-media/</guid>
+      <guid>/categories/covid/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Covid</title>
-      <link>/categories/covid/</link>
+      <title>Social media</title>
+      <link>/categories/social-media/</link>
       <pubDate>Tue, 13 Oct 2020 22:26:09 -0500</pubDate>
       
-      <guid>/categories/covid/</guid>
+      <guid>/categories/social-media/</guid>
       <description></description>
     </item>
     
