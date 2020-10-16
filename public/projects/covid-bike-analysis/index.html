@@ -191,7 +191,8 @@ ggplot(bike_ribbon, aes(x = month,
        x = &quot;&quot;,
        y = &quot;Bike rentals&quot;,
        caption = &quot;Source: TfL, London Data Store&quot;)+
-  theme_minimal()</code></pre>
+  theme_minimal()+
+  theme(axis.text = element_text(size = 7))</code></pre>
 <p><img src="/projects/covidbike_files/figure-html/monthly%20bike%20rental-1.png" width="648" style="display: block; margin: auto;" /></p>
 <p>You can easily see when the lockdown happened by the large deviation for 2020. Although interestingly enough people rented more bikes than was expected during the summer months. Maybe they were using bikes instead of the tube - or maybe they just missed biking.</p>
 <p>Next let us create a chart which looks at the weekly deviations. Instead of absolute numbers, let us see how many % they deviate from our expected number of rentals. Again here we want a line showing the actual number of rentals, and a colored area of either green or red for the difference between that and the expected value. Let’s also add a gray background to distinguish between quarters and colored tickmarks to show whether a particular week was over or under the expected value.</p>
