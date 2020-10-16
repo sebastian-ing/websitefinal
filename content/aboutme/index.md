@@ -26,6 +26,6 @@ After graduating from my bachelor's degree, I worked as an analyst for Danish pr
 
 Before starting my studies at London Business School, I furthermore had an internship at **BCG** where I worked on a VDD for a Danish health care company. This was a very data and analytics heavy project, which I found very fun and interesting. I wish I had known some of the data analytics skills I now possess but alas, perhaps they can be put to good use in future projects.
 
-##Contact details
+## Contact details
 
 Please feel free to shoot me an e-mail at Singemann.mfa2021@london.edu if you want to connect. Alternatively you can connect with me on my social media accounts - you can see the links at the bottom of the page.
