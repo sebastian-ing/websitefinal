@@ -2,7 +2,7 @@
 date: "2020-10-10"
 draft: false
 image: projects/lbs.jpg
-slug: projects
+slug: project
 title: Projects
 ---
 
