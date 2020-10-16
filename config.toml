@@ -142,8 +142,8 @@ disqusShortname = ""
     subtitle = """Orginally from Copenhagen, Denmark, I have lived and studied in Hong Kong and North Carolina. 
     I am now a student at London Business school, specializing in finance. As part of my studies I have been analyzing quite a lot of different data.
     If you are interested in some of these analyses you can find them on this website."""
-    buttonText = "Take a look"
-    url = "projects"
+    buttonText = "More about me"
+    url = "aboutme"
 
 
   # Contact section

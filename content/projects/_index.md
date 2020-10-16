@@ -1,5 +1,5 @@
 ---
-date: "2020-10-11T22:27:21-05:00"
+date: "2020-10-10"
 draft: false
 image: projects/lbs.jpg
 slug: projects
