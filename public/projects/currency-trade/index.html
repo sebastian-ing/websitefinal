@@ -1072,10 +1072,10 @@ ggplot(HRK_data_optimal, aes(x = reorder(t_year, -return),
   #Finally we add titles to the plot
   labs(title = &quot;Employing optimal strategy would have resulted in a \nmean annual return of 2.5%&quot;,
        subtitle = &quot;Return of strategy does not appear to have been reduced in recent years, \nalthough 2019 was a lowpoint&quot;,
-       caption = &quot;Source: Croation National Bank (https://hnb.hr/en)&quot;,
+       caption = &quot;Source: Croatian National Bank (https://hnb.hr/en)&quot;,
        x = &quot;Year&quot;,
        y = &quot;Return (%)&quot;)+
-  # Graphical tweakes - the scale_y_continous makes sure the columns are not floating on the x-axis.
+  # Graphical tweaks - the scale_y_continous makes sure the columns are not floating on the x-axis.
   scale_y_continuous(expand = expansion(mult = c(0, .1)))+
   theme(axis.text = element_text(size = 8))</code></pre>
 <p><img src="/projects/Currencytrade_files/figure-html/unnamed-chunk-5-1.png" width="648" style="display: block; margin: auto;" />
@@ -1171,19 +1171,44 @@ Upper CI (%)
 <div id="implementable-strategy" class="section level2">
 <h2>Implementable strategy</h2>
 <p>We just found the optimal strategy, but let us now try to do the same for the implementable strategy. What we can see in the first table we made (table 1) is that most purchase dates cluster around January and February, while most sales dates cluster around July and August. Let us therefore use the optimal trading dates we just found to find an entry and exit date for the position for every year. One way to do this would be to find the median date in the dataset.</p>
-<pre class="r"><code>HRK_optimal_dates &lt;- HRK_data_optimal %&gt;% 
-  # We want to convert the months and days for each optimal date into numbers (we do not care about the year). There is no mmdd format for lubridate, so instead we find the number of days in the year
-  mutate(monthday_purchase = month(date_purchase) * 30 + day(date_purchase),
-         monthday_sale = month(date_sale) * 30 + day(date_sale)) %&gt;% 
-  #Next we find the median purchase and sales day
+<pre class="r"><code># To find the optimal date, let us take the median of the month and date, as this will give us a good estimate for an optimal date
+
+HRK_optimal_dates &lt;- HRK_data_optimal %&gt;% 
+  
+  # We want to convert the months and days for each optimal date into numbers (we do not care about the year). There is no mmdd format for lubridate, so instead we multiply the number of month by 32 (any number larger than 31 works) and add the number of the day, this way we will be able to separate days and months when we convert it back, as the remainder of 32 will be the day, and the divisor from 32 will be the month
+  
+  # Since our purchase period (off-season) is found between two years, we cannot just multiply the month by 32, as it would mix our periodization up (we want november to be in the beginning of the period - not the end). We therefore multiply by 32*1 if month is november, 32*2 if december, 32*3 if january and so on.
+  
+  mutate(monthday_purchase = 32 * case_when(
+    month(date_purchase) == 11 ~ 1,
+    month(date_purchase) == 12 ~ 2,
+    month(date_purchase) == 1 ~ 3,
+    month(date_purchase) == 2 ~ 4,
+    month(date_purchase) == 3 ~ 5,
+    month(date_purchase) == 4 ~ 6) 
+    + day(date_purchase),
+    
+    # Convert the sales date - since all months happen during one year we do not have to do the conversion as above
+    monthday_sale = month(date_sale) * 32 + day(date_sale)) %&gt;% 
+  
+  # Finds the median date
   summarize(median_purchase = median(monthday_purchase),
             median_sale = median(monthday_sale)) %&gt;% 
-  # Now we convert this back into a seperate month and day column
-  mutate(optimal_purchase_month = month(median_purchase %/% 30, label = TRUE),
-         optimal_purchase_day = median_purchase %% 30,
-         optimal_sale_month = month(median_sale %/% 30, label = TRUE),
-         optimal_sale_day = median_sale %% 30
+    # Converts median back to month and day format
+  mutate(optimal_purchase_month = month(case_when(
+    median_purchase %/% 32 == 1 ~ 11,
+    median_purchase %/% 32 == 2 ~ 12,
+    median_purchase %/% 32 == 3 ~ 1,
+    median_purchase %/% 32 == 4 ~ 2,
+    median_purchase %/% 32 == 5 ~ 3,
+    median_purchase %/% 32 == 6 ~ 4), 
+    label = TRUE),
+         optimal_purchase_day = median_purchase %% 32,
+    
+         optimal_sale_month = month(median_sale %/% 32, label = TRUE),
+         optimal_sale_day = median_sale %% 32
          )
+
 # Let us make a nice table for this, where we furthermore show concatenate the day and month for purchase and sale date
  HRK_optimal_dates %&gt;%
    # We unite the columns of the month and day for sale and purchase and separate them with &quot;-&quot;
@@ -1212,7 +1237,7 @@ Optimal sale date
 <tbody>
 <tr>
 <td style="text-align:left;">
-Mar-2
+Jan-25
 </td>
 <td style="text-align:left;">
 Jul-18
@@ -1274,12 +1299,12 @@ HRK_fixed_dates %&gt;%
              size = 3,
              color = &quot;red&quot;)+
   #Finally we add titles to the plot
-  labs(title = &quot;The implementable strategy has on average given an annual return of 1%&quot;,
+  labs(title = &quot;The implementable strategy has on average given an annual return of 1.2%&quot;,
        subtitle = &quot;Only 2011 resulted in negative return&quot;,
-       caption = &quot;Source: Croation National Bank (https://hnb.hr/en)&quot;,
+       caption = &quot;Source: Croatian National Bank (https://hnb.hr/en)&quot;,
        x = &quot;Year&quot;,
        y = &quot;Return (%)&quot;)+
-  # Graphical tweaks - the scale_y_continous makes sure the columns are not floating on the x-axis.
+  # Graphical tweaks - the scale_y_continuous makes sure the columns are not floating on the x-axis.
   scale_y_continuous(expand = expansion(mult = c(0, .1)))+
   scale_x_continuous(limits = c(2004,2020), 
                      breaks = seq(2005,2019,  by = 1))+
@@ -1325,13 +1350,13 @@ Upper CI (%)
 <tbody>
 <tr>
 <td style="text-align:right;">
-0.98
+1.28
 </td>
 <td style="text-align:right;">
-0.62
+0.81
 </td>
 <td style="text-align:right;">
-1.34
+1.74
 </td>
 </tr>
 </tbody>
